@@ -1,105 +1,12 @@
-<!-- dashboard.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard • Goldet</title>
-  <style>
-    body {
-      margin: 0;
-      background: #000;
-      color: #ffd700;
-      font-family: Arial, sans-serif;
-      display: flex;
-    }
-
-    /* Sidebar */
-    .sidebar {
-      width: 220px;
-      background: #111;
-      height: 100vh;
-      padding: 20px;
-      border-right: 2px solid #ffd700;
-      box-shadow: 0 0 15px rgba(255,215,0,0.3);
-      position: fixed;
-    }
-
-    .sidebar h2 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    .nav-btn {
-      width: 100%;
-      padding: 12px;
-      margin-top: 10px;
-      background: #ffd700;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      color: #000;
-      font-size: 16px;
-      font-weight: bold;
-    }
-
-    .nav-btn:hover { background: #e6c000; }
-
-    /* Main content */
-    .content {
-      margin-left: 240px;
-      padding: 30px;
-      width: calc(100% - 240px);
-    }
-
-    .card {
-      background: #111;
-      border: 2px solid #ffd700;
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 0 15px rgba(255,215,0,0.2);
-    }
-
-    .inventory-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-      gap: 15px;
-    }
-
-    .item {
-      background: #222;
-      border: 1px solid #ffd700;
-      padding: 15px;
-      border-radius: 8px;
-      text-align: center;
-    }
-
-    input, select {
-      padding: 10px;
-      width: 100%;
-      border-radius: 8px;
-      border: none;
-      margin-top: 10px;
-      background: #222;
-      color: #ffd700;
-    }
-
-    button.save-btn {
-      margin-top: 10px;
-      padding: 12px;
-      width: 100%;
-      background: #ffd700;
-      border: none;
-      color: #000;
-      font-weight: bold;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
   <!-- Sidebar -->
   <div class="sidebar">
     <h2>Goldet</h2>
@@ -111,7 +18,6 @@
 
   <!-- Content -->
   <div class="content">
-
     <!-- Player Stats -->
     <div id="stats" class="card section">
       <h2>Player Stats</h2>
@@ -127,154 +33,118 @@
       <div class="inventory-grid" id="inventoryGrid"></div>
     </div>
 
-    <!-- Profile Customization -->
+    <!-- Profile Settings -->
     <div id="profile" class="card section" style="display:none;">
       <h2>Profile Settings</h2>
       <label>Change Username:</label>
       <input id="newUsername" type="text" placeholder="New username" />
-
       <label>Favorite Color:</label>
       <input id="color" type="color" />
-
       <button class="save-btn" onclick="saveProfile()">Save Changes</button>
     </div>
-
   </div>
 
-<script>
-  // Dashboard expects:
-  // - localStorage.loggedInUser to be the username string
-  // - user object stored under localStorage[username] as JSON with fields:
-  //   { username, password, level, xp, gold, inventory: [...], color }
+  <!-- Firebase + Dashboard Logic -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-  // Redirect if not logged in
-  let logged = localStorage.getItem('loggedInUser');
-  if (!logged) {
-    window.location.href = 'login.html';
-  }
-
-  let username = logged;
-  let userData = null;
-
-  // Try to load user object from localStorage[username]
-  const raw = localStorage.getItem(username);
-  if (raw) {
-    try {
-      userData = JSON.parse(raw);
-    } catch (e) {
-      console.warn('Could not parse stored user object for', username);
-    }
-  }
-
-  // If not found, maybe logged contains a JSON string with user object
-  if (!userData) {
-    try {
-      const maybeObj = JSON.parse(logged);
-      if (maybeObj && maybeObj.username) {
-        username = maybeObj.username;
-        userData = maybeObj;
-      }
-    } catch (e) { /* not JSON */ }
-  }
-
-  // If still not found, create a default user object (avoid breaking the page)
-  if (!userData) {
-    userData = {
-      username,
-      password: '',
-      level: 1,
-      xp: 0,
-      gold: 0,
-      inventory: [],
-      color: '#ffd700'
+    const firebaseConfig = {
+      apiKey: "AIzaSyCY4JnInTN2FZ7Y9ZPuAAOfaLT0Fotuli4",
+      authDomain: "goldet-game.firebaseapp.com",
+      projectId: "goldet-game",
+      storageBucket: "goldet-game.firebasestorage.app",
+      messagingSenderId: "70002400450",
+      appId: "1:70002400450:web:0534ecc49359957e022f5b",
+      measurementId: "G-MFVSWXE2N8"
     };
-    localStorage.setItem(username, JSON.stringify(userData));
-  }
 
-  // Helper to persist current userData under the current username key
-  function persistUser() {
-    localStorage.setItem(username, JSON.stringify(userData));
-  }
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-  // Show stats
-  function loadStats() {
-    document.getElementById('statUser').textContent = userData.username || username;
-    document.getElementById('statLevel').textContent = userData.level ?? 0;
-    document.getElementById('statXP').textContent = userData.xp ?? 0;
-    document.getElementById('statGold').textContent = userData.gold ?? 0;
-  }
+    let currentUserId = null;
+    let currentUserData = null;
 
-  // Show inventory
-  function loadInventory() {
-    const grid = document.getElementById('inventoryGrid');
-    grid.innerHTML = '';
-    const inv = Array.isArray(userData.inventory) ? userData.inventory : [];
-    if (inv.length === 0) {
-      const p = document.createElement('div');
-      p.className = 'item';
-      p.textContent = 'No items';
-      grid.appendChild(p);
-      return;
-    }
-    inv.forEach(item => {
-      const div = document.createElement('div');
-      div.className = 'item';
-      div.textContent = item;
-      grid.appendChild(div);
-    });
-  }
-
-  // Section switching
-  function showSection(id) {
-    document.querySelectorAll('.section').forEach(sec => sec.style.display = 'none');
-    document.getElementById(id).style.display = 'block';
-  }
-
-  // Save profile changes (including username change)
-  function saveProfile() {
-    const newUser = document.getElementById('newUsername').value.trim();
-    const color = document.getElementById('color').value;
-
-    // Handle username change
-    if (newUser && newUser !== username) {
-      // Prevent overwriting an existing user
-      if (localStorage.getItem(newUser)) {
-        alert('That username is already taken.');
+    // Auth state listener
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "login.html";
         return;
       }
-      // move data to new key
-      userData.username = newUser;
-      localStorage.setItem(newUser, JSON.stringify(userData));
-      localStorage.removeItem(username);
-      localStorage.setItem('loggedInUser', newUser);
-      username = newUser;
-      alert('Username updated!');
-      persistUser();
-      // Reload to reflect sidebar/state
-      window.location.reload();
-      return;
+      currentUserId = user.uid;
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (userDoc.exists()) {
+        currentUserData = userDoc.data();
+        loadStats();
+        loadInventory();
+        document.getElementById("color").value = currentUserData.color || "#ffd700";
+      }
+    });
+
+    // Load stats
+    function loadStats() {
+      document.getElementById("statUser").textContent = currentUserData.username;
+      document.getElementById("statLevel").textContent = currentUserData.level;
+      document.getElementById("statXP").textContent = currentUserData.xp;
+      document.getElementById("statGold").textContent = currentUserData.gold;
     }
 
-    // Save color or other profile fields
-    if (color) userData.color = color;
-    persistUser();
-    alert('Profile updated!');
-  }
+    // Load inventory
+    function loadInventory() {
+      const grid = document.getElementById("inventoryGrid");
+      grid.innerHTML = "";
+      const inv = Array.isArray(currentUserData.inventory) ? currentUserData.inventory : [];
+      if (inv.length === 0) {
+        grid.innerHTML = "<div class='item'>No items</div>";
+        return;
+      }
+      inv.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "item";
+        div.textContent = item;
+        grid.appendChild(div);
+      });
+    }
 
-  // Logout
-  function logout() {
-    localStorage.removeItem('loggedInUser');
-    window.location.href = 'login.html';
-  }
+    // Section switching
+    function showSection(id) {
+      document.querySelectorAll(".section").forEach(sec => sec.style.display = "none");
+      document.getElementById(id).style.display = "block";
+    }
 
-  // Init Load
-  loadStats();
-  loadInventory();
+    // Save profile changes
+    async function saveProfile() {
+      const newUser = document.getElementById("newUsername").value.trim();
+      const color = document.getElementById("color").value;
 
-  // Fill profile inputs
-  document.getElementById('newUsername').value = '';
-  document.getElementById('color').value = userData.color || '#ffd700';
-</script>
+      try {
+        if (newUser && newUser !== currentUserData.username) {
+          currentUserData.username = newUser;
+        }
+        if (color) {
+          currentUserData.color = color;
+        }
+        await updateDoc(doc(db, "users", currentUserId), currentUserData);
+        alert("Profile updated!");
+        window.location.reload();
+      } catch (error) {
+        alert(error.message);
+      }
+    }
 
+    // Logout
+    function logout() {
+      signOut(auth).then(() => {
+        window.location.href = "login.html";
+      });
+    }
+
+    // Expose functions globally
+    window.showSection = showSection;
+    window.saveProfile = saveProfile;
+    window.logout = logout;
+  </script>
 </body>
 </html>
