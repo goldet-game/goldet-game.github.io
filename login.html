@@ -62,26 +62,32 @@
   </div>
 
   <script>
-<script>
-function login() {
-const user = document.getElementById('username').value;
-const pass = document.getElementById('password').value;
+    function login() {
+      const user = document.getElementById('username').value;
+      const pass = document.getElementById('password').value;
 
+      const stored = localStorage.getItem(user);
+      if (!stored) {
+        alert('Account does not exist.');
+        return;
+      }
 
-const stored = localStorage.getItem(user);
-if (!stored) return alert('Account does not exist.');
+      let data;
+      try {
+        data = JSON.parse(stored);
+      } catch (e) {
+        alert('Stored account data is corrupted.');
+        return;
+      }
 
-
-const data = JSON.parse(stored);
-if (data.password === pass) {
-alert('Login successful!');
-window.location.href = "dashboard.html";
-} else {
-alert('Incorrect password.');
-}
-});
-</script>
-
+      if (data.password === pass) {
+        alert('Login successful!');
+        window.location.href = "dashboard.html";
+      } else {
+        alert('Incorrect password.');
+      }
+    }
+  </script>
 
 </body>
 </html>
