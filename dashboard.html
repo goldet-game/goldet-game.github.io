@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard • Goldet</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #000;
+      color: #ffd700;
+    }
+
+    .nav {
+      background: #111;
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #ffd700;
+    }
+    .nav h1 {
+      margin: 0;
+    }
+    .logout-btn {
+      padding: 10px 20px;
+      background: #ffd700;
+      color: #000;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .logout-btn:hover { background: #e6c000; }
+
+
+    .content {
+      padding: 40px;
+    }
+
+    .card {
+      background: #111;
+      padding: 25px;
+      border-radius: 10px;
+      border: 1px solid #ffd700;
+      max-width: 400px;
+      box-shadow: 0 0 15px rgba(255,215,0,0.3);
+    }
+
+    .title {
+      font-size: 28px;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+
+    .value {
+      font-size: 22px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="nav">
+    <h1>Goldet Dashboard</h1>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </div>
+
+  <div class="content">
+    <div class="card">
+      <div class="title">Welcome, <span id="usernameDisplay"></span>!</div>
+      <div class="value">You are now logged in to your Goldet account.</div>
+    </div>
+  </div>
+
+  <script>
+    const loggedInUser = localStorage.getItem('loggedInUser');
+
+    if (!loggedInUser) {
+      window.location.href = 'login.html';
+    }
+
+    const userData = JSON.parse(loggedInUser);
+    document.getElementById('usernameDisplay').textContent = userData.username;
+
+    function logout() {
+      localStorage.removeItem('loggedInUser');
+      window.location.href = 'login.html';
+    }
+  </script>
+</body>
+</html>
