@@ -75,7 +75,7 @@ if (!stored) return alert('Account does not exist.');
 const data = JSON.parse(stored);
 if (data.password === pass) {
 alert('Login successful!');
-    window.location.href = "dashboard.html";
+window.location.href = "dashboard.html";
 } else {
 alert('Incorrect password.');
 }
