@@ -36,7 +36,7 @@
       border-radius: 8px;
       outline: none;
     }
-    .submit {
+    .btn {
       width: 100%;
       padding: 14px;
       margin-top: 20px;
@@ -57,37 +57,31 @@
     <h1>Login</h1>
     <input id="username" type="text" placeholder="Username" />
     <input id="password" type="password" placeholder="Password" />
-    <button class="submit" onclick="login()">Login</button>
+    <button class="btn" onclick="login()">Login</button>
     <p style="margin-top: 15px; text-align: center;">No account? <a href="register.html">Register</a></p>
   </div>
 
   <script>
-document.getElementById("loginForm").addEventListener("submit", function(e) {
-    e.preventDefault();
+<script>
+function login() {
+const user = document.getElementById('username').value;
+const pass = document.getElementById('password').value;
 
-    const username = document.getElementById("loginUsername").value.trim();
-    const password = document.getElementById("loginPassword").value.trim();
 
-    // Get user from localStorage
-    const users = JSON.parse(localStorage.getItem("users")) || {};
+const stored = localStorage.getItem(user);
+if (!stored) return alert('Account does not exist.');
 
-    if (!users[username]) {
-        alert("User does not exist!");
-        return;
-    }
 
-    if (users[username].password !== password) {
-        alert("Incorrect password!");
-        return;
-    }
-
-    // Save session
-    localStorage.setItem("loggedInUser", username);
-
-    // Redirect to the dashboard
+const data = JSON.parse(stored);
+if (data.password === pass) {
+alert('Login successful!');
     window.location.href = "dashboard.html";
+} else {
+alert('Incorrect password.');
+}
 });
 </script>
+
 
 </body>
 </html>
