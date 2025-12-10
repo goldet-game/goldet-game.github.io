@@ -1,3 +1,212 @@
+<!-- Updated dashboard.html connected to new login script -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard • Goldet</title>
+  <style>
+    body {
+      margin: 0;
+      background: #000;
+      color: #ffd700;
+      font-family: Arial, sans-serif;
+      display: flex;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 220px;
+      background: #111;
+      height: 100vh;
+      padding: 20px;
+      border-right: 2px solid #ffd700;
+      box-shadow: 0 0 15px rgba(255,215,0,0.3);
+      position: fixed;
+    }
+
+    .sidebar h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .nav-btn {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      background: #ffd700;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      color: #000;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .nav-btn:hover { background: #e6c000; }
+
+    /* Main content */
+    .content {
+      margin-left: 240px;
+      padding: 30px;
+      width: calc(100% - 240px);
+    }
+
+    .card {
+      background: #111;
+      border: 2px solid #ffd700;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 15px rgba(255,215,0,0.2);
+    }
+
+    .inventory-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 15px;
+    }
+
+    .item {
+      background: #222;
+      border: 1px solid #ffd700;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    input, select {
+      padding: 10px;
+      width: 100%;
+      border-radius: 8px;
+      border: none;
+      margin-top: 10px;
+    }
+
+    button.save-btn {
+      margin-top: 10px;
+      padding: 12px;
+      width: 100%;
+      background: #ffd700;
+      border: none;
+      color: #000;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h2>Goldet</h2>
+    <button class="nav-btn" onclick="showSection('stats')">Player Stats</button>
+    <button class="nav-btn" onclick="showSection('inventory')">Inventory</button>
+    <button class="nav-btn" onclick="showSection('profile')">Profile</button>
+    <button class="nav-btn" onclick="logout()">Logout</button>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- Player Stats -->
+    <div id="stats" class="card section">
+      <h2>Player Stats</h2>
+      <p><b>Username:</b> <span id="statUser"></span></p>
+      <p><b>Level:</b> <span id="statLevel"></span></p>
+      <p><b>XP:</b> <span id="statXP"></span></p>
+      <p><b>Gold:</b> <span id="statGold"></span></p>
+    </div>
+
+    <!-- Inventory -->
+    <div id="inventory" class="card section" style="display:none;">
+      <h2>Inventory</h2>
+      <div class="inventory-grid" id="inventoryGrid"></div>
+    </div>
+
+    <!-- Profile Customization -->
+    <div id="profile" class="card section" style="display:none;">
+      <h2>Profile Settings</h2>
+      <label>Change Username:</label>
+      <input id="newUsername" type="text" placeholder="New username" />
+
+      <label>Favorite Color:</label>
+      <input id="color" type="color" />
+
+      <button class="save-btn" onclick="saveProfile()">Save Changes</button>
+    </div>
+
+  </div>
+
+<script>
+// Redirect if not logged in
+const username = localStorage.getItem('loggedInUser');
+if (!username) {
+  window.location.href = 'login.html';
+}
+
+// Load user data
+const userData = JSON.parse(localStorage.getItem(username));
+
+// Show stats
+function loadStats() {
+  document.getElementById('statUser').textContent = username;
+  document.getElementById('statLevel').textContent = userData.level;
+  document.getElementById('statXP').textContent = userData.xp;
+  document.getElementById('statGold').textContent = userData.gold;
+}
+
+// Show inventory
+function loadInventory() {
+  const grid = document.getElementById('inventoryGrid');
+  grid.innerHTML = '';
+  userData.inventory.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'item';
+    div.textContent = item;
+    grid.appendChild(div);
+  });
+}
+
+// Section switching
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(sec => sec.style.display = 'none');
+  document.getElementById(id).style.display = 'block';
+}
+
+// Save profile changes
+function saveProfile() {
+  const newUser = document.getElementById('newUsername').value.trim();
+  const color = document.getElementById('color').value;
+
+  if (newUser && newUser !== username) {
+    userData.username = newUser;
+    localStorage.setItem(newUser, JSON.stringify(userData));
+    localStorage.removeItem(username);
+    localStorage.setItem('loggedInUser', newUser);
+    alert('Username updated!');
+    window.location.reload();
+  }
+
+  userData.color = color;
+  localStorage.setItem(username, JSON.stringify(userData));
+  alert('Profile updated!');
+}
+
+// Logout
+function logout() {
+  localStorage.removeItem('loggedInUser');
+  window.location.href = 'login.html';
+}
+
+// Init Load
+loadStats();
+loadInventory();
+</script>
+
+</body>
+</html>
 <!-- dashboard.html with sidebar, stats, inventory, profile customization -->
 <!DOCTYPE html>
 <html lang="en">
