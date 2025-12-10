@@ -62,21 +62,32 @@
   </div>
 
   <script>
-    function login() {
-      const user = document.getElementById('username').value;
-      const pass = document.getElementById('password').value;
+document.getElementById("loginForm").addEventListener("submit", function(e) {
+    e.preventDefault();
 
-      const stored = localStorage.getItem(user);
-      if (!stored) return alert('Account does not exist.');
+    const username = document.getElementById("loginUsername").value.trim();
+    const password = document.getElementById("loginPassword").value.trim();
 
-      const data = JSON.parse(stored);
-      if (data.password === pass) {
-        alert('Login successful!');
-        // redirect to dashboard later
-      } else {
-        alert('Incorrect password.');
-      }
+    // Get user from localStorage
+    const users = JSON.parse(localStorage.getItem("users")) || {};
+
+    if (!users[username]) {
+        alert("User does not exist!");
+        return;
     }
-  </script>
+
+    if (users[username].password !== password) {
+        alert("Incorrect password!");
+        return;
+    }
+
+    // Save session
+    localStorage.setItem("loggedInUser", username);
+
+    // Redirect to the dashboard
+    window.location.href = "dashboard.html";
+});
+</script>
+
 </body>
 </html>
