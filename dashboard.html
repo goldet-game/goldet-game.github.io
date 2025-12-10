@@ -1,4 +1,4 @@
-<!-- Updated dashboard.html connected to new login script -->
+<!-- dashboard.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -81,6 +81,8 @@
       border-radius: 8px;
       border: none;
       margin-top: 10px;
+      background: #222;
+      color: #ffd700;
     }
 
     button.save-btn {
@@ -140,270 +142,139 @@
   </div>
 
 <script>
-// Redirect if not logged in
-const username = localStorage.getItem('loggedInUser');
-if (!username) {
-  window.location.href = 'login.html';
-}
+  // Dashboard expects:
+  // - localStorage.loggedInUser to be the username string
+  // - user object stored under localStorage[username] as JSON with fields:
+  //   { username, password, level, xp, gold, inventory: [...], color }
 
-// Load user data
-const userData = JSON.parse(localStorage.getItem(username));
-
-// Show stats
-function loadStats() {
-  document.getElementById('statUser').textContent = username;
-  document.getElementById('statLevel').textContent = userData.level;
-  document.getElementById('statXP').textContent = userData.xp;
-  document.getElementById('statGold').textContent = userData.gold;
-}
-
-// Show inventory
-function loadInventory() {
-  const grid = document.getElementById('inventoryGrid');
-  grid.innerHTML = '';
-  userData.inventory.forEach(item => {
-    const div = document.createElement('div');
-    div.className = 'item';
-    div.textContent = item;
-    grid.appendChild(div);
-  });
-}
-
-// Section switching
-function showSection(id) {
-  document.querySelectorAll('.section').forEach(sec => sec.style.display = 'none');
-  document.getElementById(id).style.display = 'block';
-}
-
-// Save profile changes
-function saveProfile() {
-  const newUser = document.getElementById('newUsername').value.trim();
-  const color = document.getElementById('color').value;
-
-  if (newUser && newUser !== username) {
-    userData.username = newUser;
-    localStorage.setItem(newUser, JSON.stringify(userData));
-    localStorage.removeItem(username);
-    localStorage.setItem('loggedInUser', newUser);
-    alert('Username updated!');
-    window.location.reload();
+  // Redirect if not logged in
+  let logged = localStorage.getItem('loggedInUser');
+  if (!logged) {
+    window.location.href = 'login.html';
   }
 
-  userData.color = color;
-  localStorage.setItem(username, JSON.stringify(userData));
-  alert('Profile updated!');
-}
+  let username = logged;
+  let userData = null;
 
-// Logout
-function logout() {
-  localStorage.removeItem('loggedInUser');
-  window.location.href = 'login.html';
-}
-
-// Init Load
-loadStats();
-loadInventory();
-</script>
-
-</body>
-</html>
-<!-- dashboard.html with sidebar, stats, inventory, profile customization -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard • Goldet</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #000;
-      color: #ffd700;
-      display: flex;
+  // Try to load user object from localStorage[username]
+  const raw = localStorage.getItem(username);
+  if (raw) {
+    try {
+      userData = JSON.parse(raw);
+    } catch (e) {
+      console.warn('Could not parse stored user object for', username);
     }
+  }
 
-    /* Sidebar */
-    .sidebar {
-      width: 230px;
-      background: #111;
-      height: 100vh;
-      padding: 20px;
-      border-right: 2px solid #ffd700;
-    }
-    .sidebar h2 {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-    .nav-btn {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 12px;
-      background: #222;
-      border: 1px solid #ffd700;
-      border-radius: 6px;
-      color: #ffd700;
-      cursor: pointer;
-      text-align: left;
-      font-size: 16px;
-    }
-    .nav-btn:hover {
-      background: #ffd700;
-      color: #000;
-    }
+  // If not found, maybe logged contains a JSON string with user object
+  if (!userData) {
+    try {
+      const maybeObj = JSON.parse(logged);
+      if (maybeObj && maybeObj.username) {
+        username = maybeObj.username;
+        userData = maybeObj;
+      }
+    } catch (e) { /* not JSON */ }
+  }
 
-    /* Main content */
-    .main {
-      padding: 40px;
-      width: 100%;
-    }
+  // If still not found, create a default user object (avoid breaking the page)
+  if (!userData) {
+    userData = {
+      username,
+      password: '',
+      level: 1,
+      xp: 0,
+      gold: 0,
+      inventory: [],
+      color: '#ffd700'
+    };
+    localStorage.setItem(username, JSON.stringify(userData));
+  }
 
-    /* Cards */
-    .card {
-      background: #111;
-      padding: 20px;
-      border-radius: 10px;
-      border: 1px solid #ffd700;
-      margin-bottom: 20px;
-      box-shadow: 0 0 15px rgba(255,215,0,0.2);
-    }
+  // Helper to persist current userData under the current username key
+  function persistUser() {
+    localStorage.setItem(username, JSON.stringify(userData));
+  }
 
-    /* Inventory Grid */
-    .inv-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-      gap: 12px;
-      margin-top: 15px;
-    }
-    .item {
-      background: #222;
-      border: 1px solid #ffd700;
-      height: 100px;
-      border-radius: 8px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-weight: bold;
-    }
+  // Show stats
+  function loadStats() {
+    document.getElementById('statUser').textContent = userData.username || username;
+    document.getElementById('statLevel').textContent = userData.level ?? 0;
+    document.getElementById('statXP').textContent = userData.xp ?? 0;
+    document.getElementById('statGold').textContent = userData.gold ?? 0;
+  }
 
-    /* Profile customization */
-    input, select {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      border-radius: 6px;
-      border: none;
-      outline: none;
-    }
-
-    .save-btn {
-      margin-top: 15px;
-      background: #ffd700;
-      color: #000;
-      padding: 12px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-  </style>
-</head>
-<body>
-
-  <div class="sidebar">
-    <h2>Goldet</h2>
-    <button class="nav-btn" onclick="showSection('stats')">Player Stats</button>
-    <button class="nav-btn" onclick="showSection('inventory')">Inventory</button>
-    <button class="nav-btn" onclick="showSection('profile')">Profile</button>
-    <button class="nav-btn" onclick="logout()">Logout</button>
-  </div>
-
-  <div class="main">
-    <!-- Stats Section -->
-    <div id="stats" class="card section">
-      <h2>Player Stats</h2>
-      <p><b>Username:</b> <span id="statUser"></span></p>
-      <p><b>Gold:</b> <span id="statGold"></span></p>
-      <p><b>Level:</b> <span id="statLevel"></span></p>
-      <p><b>XP:</b> <span id="statXP"></span></p>
-    </div>
-
-    <!-- Inventory Section -->
-    <div id="inventory" class="card section" style="display:none;">
-      <h2>Inventory</h2>
-      <div class="inv-grid" id="inventoryGrid"></div>
-    </div>
-
-    <!-- Profile Section -->
-    <div id="profile" class="card section" style="display:none;">
-      <h2>Profile Customization</h2>
-      <label>Display Name</label>
-      <input id="displayName" type="text" />
-      <label>Theme</label>
-      <select id="themeSelect">
-        <option value="gold">Gold Theme</option>
-        <option value="blue">Blue Theme</option>
-        <option value="red">Red Theme</option>
-      </select>
-      <button class="save-btn" onclick="saveProfile()">Save</button>
-    </div>
-
-  </div>
-
-  <script>
-    const loggedInUser = localStorage.getItem('loggedInUser');
-    if (!loggedInUser) window.location.href = 'login.html';
-    const user = JSON.parse(loggedInUser);
-
-    // Default stats if none exist
-    if (!user.stats) {
-      user.stats = { gold: 150, level: 1, xp: 0 };
-      user.inventory = ['Pickaxe', 'Helmet', 'Torch'];
-      user.profile = { displayName: user.username, theme: 'gold' };
-      localStorage.setItem('loggedInUser', JSON.stringify(user));
-      localStorage.setItem(user.username, JSON.stringify(user));
-    }
-
-    // Display stats
-    document.getElementById('statUser').textContent = user.username;
-    document.getElementById('statGold').textContent = user.stats.gold;
-    document.getElementById('statLevel').textContent = user.stats.level;
-    document.getElementById('statXP').textContent = user.stats.xp;
-
-    // Inventory rendering
+  // Show inventory
+  function loadInventory() {
     const grid = document.getElementById('inventoryGrid');
     grid.innerHTML = '';
-    user.inventory.forEach(item => {
+    const inv = Array.isArray(userData.inventory) ? userData.inventory : [];
+    if (inv.length === 0) {
+      const p = document.createElement('div');
+      p.className = 'item';
+      p.textContent = 'No items';
+      grid.appendChild(p);
+      return;
+    }
+    inv.forEach(item => {
       const div = document.createElement('div');
       div.className = 'item';
       div.textContent = item;
       grid.appendChild(div);
     });
+  }
 
-    // Profile customization
-    document.getElementById('displayName').value = user.profile.displayName;
-    document.getElementById('themeSelect').value = user.profile.theme;
+  // Section switching
+  function showSection(id) {
+    document.querySelectorAll('.section').forEach(sec => sec.style.display = 'none');
+    document.getElementById(id).style.display = 'block';
+  }
 
-    function saveProfile() {
-      user.profile.displayName = document.getElementById('displayName').value;
-      user.profile.theme = document.getElementById('themeSelect').value;
+  // Save profile changes (including username change)
+  function saveProfile() {
+    const newUser = document.getElementById('newUsername').value.trim();
+    const color = document.getElementById('color').value;
 
-      localStorage.setItem('loggedInUser', JSON.stringify(user));
-      localStorage.setItem(user.username, JSON.stringify(user));
-
-      alert('Profile updated!');
+    // Handle username change
+    if (newUser && newUser !== username) {
+      // Prevent overwriting an existing user
+      if (localStorage.getItem(newUser)) {
+        alert('That username is already taken.');
+        return;
+      }
+      // move data to new key
+      userData.username = newUser;
+      localStorage.setItem(newUser, JSON.stringify(userData));
+      localStorage.removeItem(username);
+      localStorage.setItem('loggedInUser', newUser);
+      username = newUser;
+      alert('Username updated!');
+      persistUser();
+      // Reload to reflect sidebar/state
+      window.location.reload();
+      return;
     }
 
-    // Sidebar navigation
-    function showSection(section) {
-      document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
-      document.getElementById(section).style.display = 'block';
-    }
+    // Save color or other profile fields
+    if (color) userData.color = color;
+    persistUser();
+    alert('Profile updated!');
+  }
 
-    function logout() {
-      localStorage.removeItem('loggedInUser');
-      window.location.href = 'login.html';
-    }
-  </script>
+  // Logout
+  function logout() {
+    localStorage.removeItem('loggedInUser');
+    window.location.href = 'login.html';
+  }
+
+  // Init Load
+  loadStats();
+  loadInventory();
+
+  // Fill profile inputs
+  document.getElementById('newUsername').value = '';
+  document.getElementById('color').value = userData.color || '#ffd700';
+</script>
+
 </body>
 </html>
