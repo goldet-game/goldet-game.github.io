@@ -8,10 +8,23 @@
   <style>
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
+      font-family: 'Inter', Arial, sans-serif;
       background: #000;
       color: #fff;
       overflow-x: hidden;
+    }
+
+    /* Smooth fade-in animation */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Gold glow animation */
+    @keyframes goldGlow {
+      0% { box-shadow: 0 0 20px #b8860b; }
+      50% { box-shadow: 0 0 40px #ffbf00; }
+      100% { box-shadow: 0 0 20px #b8860b; }
     }
 
     .split {
@@ -23,25 +36,31 @@
       width: 50%;
       background: #000;
       padding: 60px;
+      animation: fadeIn 1s ease-out;
     }
 
     .left h1 {
       font-size: 64px;
       margin: 0;
-      font-weight: 700;
+      font-weight: 800;
+      background: linear-gradient(90deg, #d4af37, #ffdd55);
+      -webkit-background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
     }
 
     .left h2 {
       font-size: 48px;
-      margin: 20px 0 0 0;
+      margin: 20px 0 0;
       font-weight: 700;
+      line-height: 1.1;
     }
 
     .left p {
       font-size: 18px;
       margin-top: 30px;
       max-width: 500px;
-      line-height: 1.5;
+      line-height: 1.6;
     }
 
     .buttons {
@@ -53,28 +72,51 @@
     .btn {
       padding: 18px 40px;
       border-radius: 40px;
-      border: 2px solid #fff;
+      border: 2px solid #ffd700;
       background: none;
-      color: #fff;
+      color: #ffd700;
       font-size: 22px;
       cursor: pointer;
-      transition: 0.2s;
+      transition: 0.25s;
       text-decoration: none;
+      font-weight: 600;
     }
 
     .btn:hover {
-      background: #fff;
+      background: #ffd700;
       color: #000;
+      transform: translateY(-3px);
+      box-shadow: 0 0 20px #ffd700;
     }
 
     .right {
       width: 50%;
-      background: #613504;
+      background: linear-gradient(160deg, #5a2f01 0%, #9a5c0a 100%);
       display: flex;
       justify-content: center;
       align-items: center;
       position: relative;
       flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Gold particles */
+    .particles {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      background-image: radial-gradient(#ffdd55 1px, transparent 1px);
+      background-size: 3px 3px;
+      opacity: 0.07;
+      animation: glowMove 10s infinite linear;
+    }
+
+    @keyframes glowMove {
+      from { transform: translateY(0); }
+      to { transform: translateY(-200px); }
     }
 
     .login {
@@ -84,16 +126,25 @@
       padding: 12px 32px;
       border-radius: 40px;
       background: #000;
-      color: #613504;
+      color: #ffdd55;
       font-size: 24px;
       text-decoration: none;
+      font-weight: 600;
+      border: 2px solid #ffdd55;
     }
 
-    .glorp-img {
-      width: 230px;
-      height: 230px;
-      border-radius: 30px;
+    .login:hover {
+      color: #000;
+      background: #ffdd55;
+      box-shadow: 0 0 20px #ffdd55;
+    }
+
+    .gold-img {
+      width: 260px;
+      height: 260px;
+      border-radius: 35px;
       object-fit: cover;
+      animation: goldGlow 3s infinite ease-in-out;
     }
 
     .footer {
@@ -103,6 +154,12 @@
       color: #000;
       font-size: 14px;
     }
+
+    .footer a {
+      color: #000;
+      font-weight: 600;
+    }
+
   </style>
 </head>
 <body>
@@ -110,9 +167,9 @@
   <div class="split">
     <div class="left">
       <h1>Goldet</h1>
-      <h2>First<br />Gold<br />Web-Game</h2>
+      <h2>First<br>Gold<br>Web-Game</h2>
 
-      <p>Goldet is the first ever Gold Blooket private server written entirely in TS and JS.<br /><br />Created by GhostRider and Invaser</p>
+      <p>Goldet is the first ever Gold Blooket private server written entirely in TS and JS.<br><br>Created by GhostRider and Invaser</p>
 
       <div class="buttons">
         <a class="btn" href="register.html">Register</a>
@@ -123,13 +180,14 @@
         🔊 Pronunciation ("Gold-it")
       </p>
 
-      <p style="color: #777; font-size: 12px; margin-top: 80px;">We are not affiliated with Blooket in any way.<br />Glorpit © 2025 All Rights Reserved.</p>
+      <p style="color: #777; font-size: 12px; margin-top: 80px;">We are not affiliated with Blooket in any way.<br>Glorpit © 2025 All Rights Reserved.</p>
     </div>
 
     <div class="right">
+      <div class="particles"></div>
       <a class="login" href="login.html">Login</a>
-      <img class="gold-img" src="https://cdn.discordapp.com/icons/1431394601813545083/f46fb8ebb7c5bffa35396308f2f511f3.webp?size=32" alt="gold image" />
-      <div class="footer">Running Goldet v1 · <a href="#" style="color: #000;">Terms of Service</a></div>
+      <img class="gold-img" src="https://cdn.discordapp.com/icons/1431394601813545083/f46fb8ebb7c5bffa35396308f2f511f3.webp?size=256" alt="gold image" />
+      <div class="footer">Running Goldet v1 · <a href="#">Terms of Service</a></div>
     </div>
   </div>
 
