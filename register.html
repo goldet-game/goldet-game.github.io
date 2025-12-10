@@ -1,67 +1,80 @@
 <!DOCTYPE html>
-background: #111;
-padding: 40px;
-border-radius: 15px;
-width: 350px;
-border: 2px solid #ffd700;
-box-shadow: 0 0 20px rgba(255,215,0,0.4);
-}
-.box h1 {
-text-align: center;
-margin-bottom: 25px;
-}
-input {
-width: 100%;
-padding: 12px;
-margin-top: 12px;
-border: none;
-border-radius: 8px;
-outline: none;
-}
-.btn {
-width: 100%;
-padding: 14px;
-margin-top: 20px;
-background: #ffd700;
-border: none;
-border-radius: 8px;
-cursor: pointer;
-color: #000;
-font-size: 16px;
-font-weight: bold;
-}
-.btn:hover { background: #e6c000; }
-a { color: #ffd700; text-decoration: none; }
-</style>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register • Goldet</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #000;
+      color: #ffd700;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .box {
+      background: #111;
+      padding: 40px;
+      border-radius: 15px;
+      width: 350px;
+      border: 2px solid #ffd700;
+      box-shadow: 0 0 20px rgba(255,215,0,0.4);
+    }
+    .box h1 {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-top: 12px;
+      border: none;
+      border-radius: 8px;
+      outline: none;
+    }
+    .btn {
+      width: 100%;
+      padding: 14px;
+      margin-top: 20px;
+      background: #ffd700;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      color: #000;
+      font-size: 16px;
+      font-weight: bold;
+    }
+    .btn:hover { background: #e6c000; }
+    a { color: #ffd700; text-decoration: none; }
+  </style>
 </head>
 <body>
-<div class="box">
-<h1>Register</h1>
-<input id="username" type="text" placeholder="Create Username" />
-<input id="password" type="password" placeholder="Create Password" />
-<button class="btn" onclick="register()">Create Account</button>
-<p style="margin-top: 15px; text-align: center;">Already registered? <a href="login.html">Login</a></p>
-</div>
+  <div class="box">
+    <h1>Register</h1>
+    <input id="username" type="text" placeholder="Create Username" />
+    <input id="password" type="password" placeholder="Create Password" />
+    <button class="btn" onclick="register()">Create Account</button>
+    <p style="margin-top: 15px; text-align: center;">Already registered? <a href="login.html">Login</a></p>
+  </div>
 
+  <script>
+    function register() {
+      const user = document.getElementById('username').value;
+      const pass = document.getElementById('password').value;
 
-<script>
-function register() {
-const user = document.getElementById('username').value;
-const pass = document.getElementById('password').value;
+      if (!user || !pass) return alert('Fill out all fields.');
 
+      if (localStorage.getItem(user)) {
+        return alert('Username already exists.');
+      }
 
-if (!user || !pass) return alert('Fill out all fields.');
-
-
-if (localStorage.getItem(user)) {
-return alert('Username already exists.');
-}
-
-
-localStorage.setItem(user, JSON.stringify({ username: user, password: pass }));
-alert('Account created! You can now log in.');
-window.location.href = 'login.html';
-}
-</script>
+      localStorage.setItem(user, JSON.stringify({ username: user, password: pass }));
+      alert('Account created! You can now log in.');
+      window.location.href = 'login.html';
+    }
+  </script>
 </body>
 </html>
