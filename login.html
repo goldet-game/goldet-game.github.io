@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Login • Goldet</title>
+    <link rel="icon" type="image/png" href="https://cdn.discordapp.com/emojis/1398772312194420817.webp?size=40">
+<style>
+body {margin: 0;font-family: Arial, sans-serif;background: #613504;color: #fff;display: flex;justify-content: center;align-items: center;height: 100vh;
+}.card {background: #111;padding: 40px;border-radius: 20px;width: 360px;
+}h1 {text-align: center;margin: 0 0 30px 0;font-size: 36px;}input {width: 100%;padding: 15px;margin: 10px 0;border-radius: 12px;border: none;outline: none;font-size: 16px;
+}.btn {width: 100%;padding: 15px;border-radius: 40px;background: #613504;color: #000;border: none;cursor: pointer;margin-top: 20px;font-size: 18px;transition: 0.2s;
+}.btn:hover { background: #d6ffca; }.links {text-align: center;margin-top: 20px;
+}.links a { color: #e3a41e; text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="card">
+<h1>Login</h1>
+<form>
+<input type="text" placeholder="Username" required />
+<input type="password" placeholder="Password" required />
+<button class="btn">Login</button>
+</form>
+<div class="links">
+<a href="register.html">Don't have an account? Register</a>
+</div>
+</div>
+
+    <script>
+  const users = JSON.parse(localStorage.getItem("users")) || {};
+
+  document.querySelector("form").addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const username = document.querySelectorAll("input")[0].value.trim();
+    const password = document.querySelectorAll("input")[1].value;
+    if (!users[username]) {
+      alert("User does not exist.");
+      return;
+    }    if (users[username].password !== password) {
+      alert("Incorrect password.");
+      return;
+    }
+    localStorage.setItem("loggedInUser", username);
+
+    alert("Login successful!");
+    window.location.href = "stats.html";
+  });
+</script>
+
+</body>
+</html>
