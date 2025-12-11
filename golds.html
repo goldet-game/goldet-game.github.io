@@ -15,7 +15,6 @@
       height: 100vh;
     }
 
-    /* Sidebar */
     .sidebar {
       width: 250px;
       background: #000;
@@ -54,7 +53,6 @@
       transform: translateX(5px);
     }
 
-    /* Main */
     .main {
       flex: 1;
       background: linear-gradient(160deg, #5a2f01 0%, #9a5c0a 100%);
@@ -81,38 +79,53 @@
       z-index: 1;
     }
 
-    .user-info {
-      margin-bottom: 30px;
-      padding: 20px;
-      border: 2px solid #ffd700;
-      border-radius: 15px;
-      background: rgba(0,0,0,0.6);
+    .pack {
+      margin-bottom: 40px;
     }
 
-    .user-info h2 {
-      margin: 0 0 10px;
+    .pack h2 {
       font-size: 28px;
       color: #ffd700;
+      margin-bottom: 16px;
     }
 
-    .inventory-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px;
-      border-bottom: 1px solid rgba(255,215,0,0.2);
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 20px;
     }
 
-    .inventory-item span {
-      font-size: 18px;
+    .card {
+      background: rgba(0,0,0,0.6);
+      border: 2px solid #ffd700;
+      border-radius: 12px;
+      padding: 10px;
+      text-align: center;
+      transition: 0.3s;
     }
 
-    .inventory-item .name {
+    .card img {
+      width: 100%;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 8px;
+      filter: grayscale(100%) brightness(0.4);
+      transition: 0.3s;
+    }
+
+    .card.owned img {
+      filter: none;
+    }
+
+    .card .name {
+      margin-top: 10px;
+      font-size: 16px;
       color: #ffdd55;
       font-weight: 600;
     }
 
-    .inventory-item .qty {
+    .card .qty {
+      font-size: 14px;
       color: #ffd700;
     }
 
@@ -144,55 +157,48 @@
 
   <div class="main">
     <div class="particles"></div>
-    <div class="content">
-      <div class="user-info">
-        <h2 id="userName">User: </h2>
-        <p>Your inventory items are listed below.</p>
-      </div>
-
-      <div id="inventoryList">No items yet.</div>
-    </div>
+    <div class="content" id="inventoryDisplay"></div>
     <div class="footer">Running Goldet v1 · <a href="#">Terms of Service</a></div>
   </div>
 
   <script>
-    const LS_USER = "goldetUser";
     const LS_INV = "goldetInventory";
 
-    const ITEMS = {
-      "gold-bar": "Gold Bar",
-      "gold-coin": "Gold Coin",
-      "golden-key": "Golden Key",
-      "royal-crown": "Royal Crown"
+    const PACKS = {
+      "Space Pack": [
+        { id: "earth", name: "Earth", img: "https://images.unsplash.com/photo-1476610182048-b716b8518aae?q=80&w=600&auto=format&fit=crop" },
+        { id: "mars", name: "Mars", img: "https://images.unsplash.com/photo-1580422333073-5e7b3a2b9c5e?q=80&w=600&auto=format&fit=crop" }
+      ],
+      "Combat Pack": [
+        { id: "sword", name: "Sword", img: "https://images.unsplash.com/photo-1602526216033-9b2d7e7e2c6f?q=80&w=600&auto=format&fit=crop" },
+        { id: "shield", name: "Shield", img: "https://images.unsplash.com/photo-1612197524239-2d7b2e7e2c6f?q=80&w=600&auto=format&fit=crop" }
+      ]
     };
 
-    const storedUser = localStorage.getItem(LS_USER);
-    if (storedUser) {
-      const { username } = JSON.parse(storedUser);
-      document.getElementById("userName").textContent = "User: " + username;
-    } else {
-      document.getElementById("userName").textContent = "No user logged in.";
-    }
+    const inventory = JSON.parse(localStorage.getItem(LS_INV) || "{}");
 
-    const inv = localStorage.getItem(LS_INV);
-    const list = document.getElementById("inventoryList");
+    const display = document.getElementById("inventoryDisplay");
+    display.innerHTML = "";
 
-    if (inv) {
-      const parsed = JSON.parse(inv);
-      const entries = Object.entries(parsed);
-      if (entries.length) {
-        list.innerHTML = entries.map(([id, qty]) => {
-          const name = ITEMS[id] || id;
-          return `<div class="inventory-item">
-                    <span class="name">${name}</span>
-                    <span class="qty">Qty: ${qty}</span>
-                  </div>`;
-        }).join("");
-      } else {
-        list.textContent = "No items yet.";
-      }
-    } else {
-      list.textContent = "No items yet.";
+    for (const [packName, items] of Object.entries(PACKS)) {
+      const section = document.createElement("div");
+      section.className = "pack";
+      section.innerHTML = `<h2>${packName}</h2><div class="grid"></div>`;
+      const grid = section.querySelector(".grid");
+
+      items.forEach(item => {
+        const owned = inventory[item.id] || 0;
+        const card = document.createElement("div");
+        card.className = "card" + (owned ? " owned" : "");
+        card.innerHTML = `
+          <img src="${item.img}" alt="${item.name}">
+          <div class="name">${item.name}</div>
+          ${owned ? `<div class="qty">Qty: ${owned}</div>` : ""}
+        `;
+        grid.appendChild(card);
+      });
+
+      display.appendChild(section);
     }
   </script>
 </body>
