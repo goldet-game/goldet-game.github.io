@@ -1,99 +1,307 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Market - Goldet</title>
   <style>
-    body { margin:0; font-family:'Inter',Arial,sans-serif; background:#000; color:#fff; display:flex; height:100vh; }
-    .sidebar { width:250px; background:#000; border-right:2px solid #ffd700; padding:30px 20px; display:flex; flex-direction:column; gap:20px; }
-    .sidebar h1 { font-size:32px; margin:0; font-weight:800; background:linear-gradient(90deg,#d4af37,#ffdd55); -webkit-background-clip:text; color:transparent; }
-    .nav-link { padding:12px 18px; border-radius:10px; border:2px solid #ffd700; background:none; color:#ffd700; font-size:18px; text-decoration:none; font-weight:600; transition:0.25s; }
-    .nav-link:hover { background:#ffd700; color:#000; transform:translateX(5px); }
-    .main { flex:1; background:linear-gradient(160deg,#5a2f01 0%,#9a5c0a 100%); padding:40px; position:relative; overflow-y:auto; }
-    .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:20px; }
-    .pack { background:rgba(0,0,0,0.6); border:2px solid #ffd700; border-radius:12px; padding:10px; text-align:center; cursor:pointer; transition:0.3s; }
-    .pack:hover { transform:scale(1.05); box-shadow:0 0 8px #ffd700; }
-    .pack img { width:100%; height:100px; object-fit:cover; border-radius:8px; }
-    .pack .name { margin-top:10px; font-size:16px; color:#ffdd55; font-weight:600; }
-    .popup { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); display:flex; justify-content:center; align-items:center; flex-direction:column; z-index:999; cursor:pointer; }
-    .popup img { width:240px; height:240px; object-fit:contain; border-radius:20px; border:3px solid #ffd700; }
-    .popup .label { margin-top:20px; font-size:24px; font-weight:700; }
-    /* Rarity animations */
-    .common { border-color:#aaa; box-shadow:0 0 10px #aaa; }
-    .rare { border-color:#00f; animation:pulseBlue 1.5s infinite; }
-    .epic { border-color:#a0f; animation:pulsePurple 1.5s infinite; }
-    .legendary { border-color:#ffd700; animation:pulseGold 1.5s infinite; }
-    @keyframes pulseBlue { 0%{box-shadow:0 0 10px #00f;} 50%{box-shadow:0 0 25px #00f;} 100%{box-shadow:0 0 10px #00f;} }
-    @keyframes pulsePurple { 0%{box-shadow:0 0 10px #a0f;} 50%{box-shadow:0 0 25px #a0f;} 100%{box-shadow:0 0 10px #a0f;} }
-    @keyframes pulseGold { 0%{box-shadow:0 0 10px #ffd700;} 50%{box-shadow:0 0 30px #ffd700;} 100%{box-shadow:0 0 10px #ffd700;} }
+    :root{
+      --gold:#ffd700;
+      --gold-acc:#ffdd55;
+      --bg-dark:#000;
+      --panel: rgba(0,0,0,0.6);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter,Arial,sans-serif;
+      background:var(--bg-dark);
+      color:#fff;
+      display:flex;
+      height:100vh;
+      overflow:hidden;
+    }
+
+    /* Sidebar */
+    .sidebar{
+      width:250px;
+      background:#000;
+      border-right:2px solid var(--gold);
+      padding:28px 18px;
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+    }
+    .brand{
+      font-weight:800;
+      font-size:28px;
+      background:linear-gradient(90deg,#d4af37,var(--gold-acc));
+      -webkit-background-clip:text;
+      color:transparent;
+      text-shadow:0 0 1px rgba(255,215,0,0.6);
+    }
+    .nav-link{
+      display:block;
+      padding:10px 12px;
+      border-radius:10px;
+      border:2px solid var(--gold);
+      color:var(--gold);
+      text-decoration:none;
+      font-weight:600;
+      text-shadow:0 0 1px var(--gold);
+      transition:transform .18s,background .18s,color .18s;
+    }
+    .nav-link:hover{ transform:translateX(6px); background:var(--gold); color:#000; }
+
+    /* Main */
+    .main{
+      flex:1;
+      background:linear-gradient(160deg,#5a2f01 0%,#9a5c0a 100%);
+      padding:32px;
+      position:relative;
+      overflow:auto;
+    }
+    .particles{
+      position:absolute; inset:0; pointer-events:none;
+      background-image:radial-gradient(var(--gold-acc) 1px, transparent 1px);
+      background-size:3px 3px; opacity:0.06;
+    }
+
+    h1{ margin:0 0 18px 0; color:var(--gold); text-shadow:0 0 1px var(--gold); font-size:26px; }
+
+    /* Grid */
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+      gap:18px;
+    }
+    .pack{
+      background:var(--panel);
+      border:2px solid var(--gold);
+      border-radius:12px;
+      padding:10px;
+      text-align:center;
+      cursor:pointer;
+      transition:transform .18s,box-shadow .18s;
+    }
+    .pack:hover{ transform:scale(1.04); box-shadow:0 0 1px var(--gold); }
+    .pack img{ width:100%; height:100px; object-fit:cover; border-radius:8px; display:block; }
+    .pack .name{ margin-top:10px; color:var(--gold-acc); font-weight:700; text-shadow:0 0 1px var(--gold-acc); }
+
+    /* Popup */
+    .popup{
+      position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
+      background:rgba(0,0,0,0.96); z-index:999; cursor:pointer; flex-direction:column;
+    }
+    .popup .card{
+      width:320px; height:320px; border-radius:18px; display:flex; align-items:center; justify-content:center;
+      border:3px solid var(--gold); background:var(--panel); padding:18px;
+    }
+    .popup img{ width:260px; height:260px; object-fit:cover; border-radius:12px; display:block; }
+    .popup .label{ margin-top:16px; font-size:20px; color:var(--gold-acc); font-weight:800; text-shadow:0 0 1px var(--gold-acc); }
+
+    /* Rarity classes - subtle 1px glow */
+    .rarity-common{ border-color:#9b9b9b; box-shadow:0 0 1px #9b9b9b; }
+    .rarity-rare{ border-color:#2b6cff; box-shadow:0 0 1px #2b6cff; }
+    .rarity-epic{ border-color:#a05cff; box-shadow:0 0 1px #a05cff; }
+    .rarity-legendary{ border-color:var(--gold); box-shadow:0 0 1px var(--gold); }
+
+    .muted{ color:rgba(255,255,255,0.8); font-size:13px; }
+
+    @media (max-width:900px){
+      .sidebar{ display:none } 
+      body{ overflow:auto }
+    }
   </style>
 </head>
 <body>
   <div class="sidebar">
-    <h1>Goldet</h1>
+    <div class="brand">Goldet</div>
     <a class="nav-link" href="stats.html">Stats</a>
     <a class="nav-link" href="market.html">Market</a>
     <a class="nav-link" href="golds.html">Inventory</a>
   </div>
+
   <div class="main">
-    <h2 style="color:#ffd700;">Choose a Pack</h2>
+    <div class="particles" aria-hidden="true"></div>
+    <h1>Market — Tap a pack to open</h1>
     <div class="grid" id="packGrid"></div>
+    <div style="height:40px"></div>
   </div>
-  <div class="popup" id="popup" style="display:none;" onclick="handlePopupClick()">
-    <img id="popupImg" src="" alt="Pack">
+
+  <!-- popup -->
+  <div id="popup" class="popup" style="display:none;" onclick="onPopupClick(event)">
+    <div class="card" id="popupCard">
+      <img id="popupImg" src="" alt="pack or item">
+    </div>
     <div class="label" id="popupLabel">Opening Pack...</div>
+    <div style="height:18px"></div>
+    <div class="muted">Tap the screen to reveal / close</div>
   </div>
+
   <script>
-    const LS_INV="goldetInventory";
-    const PACKS={
-      "Space Pack":{img:"https://picsum.photos/id/1011/300/200",items:[
-        {id:"earth",name:"Earth",img:"https://picsum.photos/id/1015/300/200",rarity:"uncommon"},
-        {id:"mars",name:"Mars",img:"https://picsum.photos/id/1021/300/200",rarity:"rare"}]},
-      "Combat Pack":{img:"https://picsum.photos/id/1040/300/200",items:[
-        {id:"sword",name:"Sword",img:"https://picsum.photos/id/1062/300/200",rarity:"common"},
-        {id:"shield",name:"Shield",img:"https://picsum.photos/id/1074/300/200",rarity:"epic"}]},
-      "Pirate Pack":{img:"https://picsum.photos/id/1084/300/200",items:[
-        {id:"treasure",name:"Treasure Chest",img:"https://picsum.photos/id/1080/300/200",rarity:"legendary"},
-        {id:"map",name:"Treasure Map",img:"https://picsum.photos/id/109/300/200",rarity:"rare"}]},
-      "Safari Pack":{img:"https://picsum.photos/id/110/300/200",items:[
-        {id:"lion",name:"Lion",img:"https://picsum.photos/id/111/300/200",rarity:"epic"},
-        {id:"elephant",name:"Elephant",img:"https://picsum.photos/id/112/300/200",rarity:"common"}]},
-      "Candy Pack":{img:"https://picsum.photos/id/113/300/200",items:[
-        {id:"lollipop",name:"Lollipop",img:"https://picsum.photos/id/114/300/200",rarity:"rare"},
-        {id:"chocolate",name:"Chocolate",img:"https://picsum.photos/id/115/300/200",rarity:"common"}]}
+    // localStorage keys
+    const LS_INV = "goldetInventory";
+    const LS_BAL = "goldetBalance";
+
+    // ensure starting balance
+    if (!localStorage.getItem(LS_BAL)) localStorage.setItem(LS_BAL, "1000");
+
+    // Packs and items (many packs + items). Images use picsum placeholders; replace with your assets if desired.
+    const PACKS = {
+      "Space Pack": {
+        img: "https://picsum.photos/id/1011/600/400",
+        items: [
+          { id: "earth", name: "Earth", img: "https://picsum.photos/id/1015/600/400", rarity: "common" },
+          { id: "mars", name: "Mars", img: "https://picsum.photos/id/1021/600/400", rarity: "rare" },
+          { id: "jupiter", name: "Jupiter", img: "https://picsum.photos/id/1003/600/400", rarity: "epic" },
+          { id: "nebula", name: "Nebula", img: "https://picsum.photos/id/1016/600/400", rarity: "legendary" }
+        ]
+      },
+      "Combat Pack": {
+        img: "https://picsum.photos/id/1040/600/400",
+        items: [
+          { id: "sword", name: "Sword", img: "https://picsum.photos/id/1062/600/400", rarity: "common" },
+          { id: "axe", name: "Axe", img: "https://picsum.photos/id/1063/600/400", rarity: "rare" },
+          { id: "shield", name: "Shield", img: "https://picsum.photos/id/1074/600/400", rarity: "epic" },
+          { id: "warhelm", name: "War Helm", img: "https://picsum.photos/id/1076/600/400", rarity: "legendary" }
+        ]
+      },
+      "Pirate Pack": {
+        img: "https://picsum.photos/id/1084/600/400",
+        items: [
+          { id: "map", name: "Treasure Map", img: "https://picsum.photos/id/109/600/400", rarity: "rare" },
+          { id: "compass", name: "Compass", img: "https://picsum.photos/id/110/600/400", rarity: "common" },
+          { id: "chest", name: "Treasure Chest", img: "https://picsum.photos/id/1080/600/400", rarity: "legendary" },
+          { id: "parrot", name: "Parrot", img: "https://picsum.photos/id/111/600/400", rarity: "epic" }
+        ]
+      },
+      "Safari Pack": {
+        img: "https://picsum.photos/id/112/600/400",
+        items: [
+          { id: "lion", name: "Lion", img: "https://picsum.photos/id/237/600/400", rarity: "epic" },
+          { id: "elephant", name: "Elephant", img: "https://picsum.photos/id/1025/600/400", rarity: "common" },
+          { id: "giraffe", name: "Giraffe", img: "https://picsum.photos/id/1027/600/400", rarity: "rare" },
+          { id: "rhino", name: "Rhino", img: "https://picsum.photos/id/1024/600/400", rarity: "legendary" }
+        ]
+      },
+      "Candy Pack": {
+        img: "https://picsum.photos/id/113/600/400",
+        items: [
+          { id: "lollipop", name: "Lollipop", img: "https://picsum.photos/id/114/600/400", rarity: "common" },
+          { id: "chocolate", name: "Chocolate", img: "https://picsum.photos/id/115/600/400", rarity: "common" },
+          { id: "gummy", name: "Gummy", img: "https://picsum.photos/id/116/600/400", rarity: "rare" },
+          { id: "candybag", name: "Candy Bag", img: "https://picsum.photos/id/117/600/400", rarity: "epic" }
+        ]
+      },
+      "Dino Pack": {
+        img: "https://picsum.photos/id/118/600/400",
+        items: [
+          { id: "t-rex", name: "T-Rex", img: "https://picsum.photos/id/119/600/400", rarity: "epic" },
+          { id: "triceratops", name: "Triceratops", img: "https://picsum.photos/id/120/600/400", rarity: "rare" },
+          { id: "velociraptor", name: "Velociraptor", img: "https://picsum.photos/id/121/600/400", rarity: "common" },
+          { id: "pterosaur", name: "Pterosaur", img: "https://picsum.photos/id/122/600/400", rarity: "legendary" }
+        ]
+      },
+      "Magic Pack": {
+        img: "https://picsum.photos/id/123/600/400",
+        items: [
+          { id: "wand", name: "Wand", img: "https://picsum.photos/id/124/600/400", rarity: "common" },
+          { id: "spellbook", name: "Spellbook", img: "https://picsum.photos/id/125/600/400", rarity: "rare" },
+          { id: "crystal", name: "Crystal", img: "https://picsum.photos/id/126/600/400", rarity: "epic" },
+          { id: "phoenix", name: "Phoenix", img: "https://picsum.photos/id/127/600/400", rarity: "legendary" }
+        ]
+      },
+      "Music Pack": {
+        img: "https://picsum.photos/id/128/600/400",
+        items: [
+          { id: "guitar", name: "Guitar", img: "https://picsum.photos/id/129/600/400", rarity: "common" },
+          { id: "drums", name: "Drums", img: "https://picsum.photos/id/130/600/400", rarity: "rare" },
+          { id: "synth", name: "Synth", img: "https://picsum.photos/id/131/600/400", rarity: "epic" },
+          { id: "microphone", name: "Microphone", img: "https://picsum.photos/id/132/600/400", rarity: "legendary" }
+        ]
+      },
+      "Retro Pack": {
+        img: "https://picsum.photos/id/133/600/400",
+        items: [
+          { id: "arcade", name: "Arcade", img: "https://picsum.photos/id/134/600/400", rarity: "rare" },
+          { id: "cassette", name: "Cassette", img: "https://picsum.photos/id/135/600/400", rarity: "common" },
+          { id: "polaroid", name: "Polaroid", img: "https://picsum.photos/id/136/600/400", rarity: "epic" },
+          { id: "vhs", name: "VHS", img: "https://picsum.photos/id/137/600/400", rarity: "legendary" }
+        ]
+      }
+      // add more packs here if desired
     };
-    const packGrid=document.getElementById("packGrid");
-    const popup=document.getElementById("popup");
-    const popupImg=document.getElementById("popupImg");
-    const popupLabel=document.getElementById("popupLabel");
-    let currentPack=null; let revealStage=0; let revealedItem=null;
-    for(const [packName,packData] of Object.entries(PACKS)){
-      const div=document.createElement("div");
-      div.className="pack";
-      div.innerHTML=`<img src="${packData.img}"><div class="name">${packName}</div>`;
-      div.onclick=()=>openPack(packName);
-      packGrid.appendChild(div);
+
+    // map rarity to CSS class
+    const rarityClass = {
+      common: "rarity-common",
+      rare: "rarity-rare",
+      epic: "rarity-epic",
+      legendary: "rarity-legendary"
+    };
+
+    // render packs
+    const packGrid = document.getElementById("packGrid");
+    for (const [packName, packData] of Object.entries(PACKS)) {
+      const el = document.createElement("div");
+      el.className = "pack";
+      el.innerHTML = `
+        <img src="${packData.img}" alt="${packName}">
+        <div class="name">${packName}</div>
+      `;
+      el.addEventListener("click", () => openPack(packName));
+      packGrid.appendChild(el);
     }
-    function openPack(name){currentPack=name;revealStage=0;popupImg.src=PACKS[name].img;popupLabel.textContent="Opening Pack...";popup.style.display="flex";}
-    function handlePopupClick(){
-      if(revealStage===0){
-        const items=PACKS[currentPack].items;
-        revealedItem=items[Math.floor(Math.random()*items.length)];
-        popupImg.src=revealedItem.img;
-        popupLabel.textContent=revealedItem.name;
-        popupImg.className=revealedItem.rarity;
-        addToInventory(revealedItem.id);
-        revealStage=1;
+
+    // popup state
+    const popup = document.getElementById("popup");
+    const popupImg = document.getElementById("popupImg");
+    const popupLabel = document.getElementById("popupLabel");
+    let currentPack = null;
+    let stage = 0; // 0 = pack shown, 1 = revealed item
+
+    function openPack(packName) {
+      currentPack = packName;
+      stage = 0;
+      const packData = PACKS[packName];
+      popupImg.src = packData.img;
+      popupImg.className = ""; // clear rarity classes
+      popupLabel.textContent = packName;
+      popup.style.display = "flex";
+    }
+
+    function onPopupClick(e) {
+      if (!currentPack) return;
+      if (stage === 0) {
+        // reveal random item (uniform). Replace with weighted logic if desired.
+        const items = PACKS[currentPack].items;
+        const chosen = items[Math.floor(Math.random() * items.length)];
+        popupImg.src = chosen.img;
+        popupLabel.textContent = chosen.name + " • " + chosen.rarity.toUpperCase();
+        popupImg.className = rarityClass[chosen.rarity] || "";
+        addToInventory(chosen.id);
+        stage = 1;
       } else {
-        popup.style.display="none"; popupImg.src=""; popupLabel.textContent=""; popupImg.className=""; currentPack=null; revealedItem=null; revealStage=0;
+        // close popup
+        popup.style.display = "none";
+        popupImg.src = "";
+        popupLabel.textContent = "";
+        popupImg.className = "";
+        currentPack = null;
+        stage = 0;
       }
     }
-    function addToInventory(itemId){const inv=JSON.parse(localStorage    function addToInventory(itemId){
+
+    // save to inventory
+    function addToInventory(itemId) {
       const inv = JSON.parse(localStorage.getItem(LS_INV) || "{}");
       inv[itemId] = (inv[itemId] || 0) + 1;
       localStorage.setItem(LS_INV, JSON.stringify(inv));
     }
+
+    // expose onPopupClick to global scope for inline onclick
+    window.onPopupClick = onPopupClick;
   </script>
 </body>
 </html>
