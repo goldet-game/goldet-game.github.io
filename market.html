@@ -4,26 +4,29 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Market - Goldet</title>
-  <link rel="icon" type="image/png" href="https://cdn.discordapp.com/icons/1431394601813545083/f46fb8ebb7c5bffa35396308f2f511f3.webp?size=32">
   <style>
-    body { margin:0; font-family:'Inter',Arial,sans-serif; background:#000; color:#fff; display:flex; height:100vh; overflow:hidden; }
+    body { margin:0; font-family:'Inter',Arial,sans-serif; background:#000; color:#fff; display:flex; height:100vh; }
     .sidebar { width:250px; background:#000; border-right:2px solid #ffd700; padding:30px 20px; display:flex; flex-direction:column; gap:20px; }
-    .sidebar h1 { font-size:32px; margin:0; font-weight:800; background:linear-gradient(90deg,#d4af37,#ffdd55); -webkit-background-clip:text; color:transparent; text-shadow:0 0 1px rgba(255,215,0,0.4); }
+    .sidebar h1 { font-size:32px; margin:0; font-weight:800; background:linear-gradient(90deg,#d4af37,#ffdd55); -webkit-background-clip:text; color:transparent; }
     .nav-link { padding:12px 18px; border-radius:10px; border:2px solid #ffd700; background:none; color:#ffd700; font-size:18px; text-decoration:none; font-weight:600; transition:0.25s; }
     .nav-link:hover { background:#ffd700; color:#000; transform:translateX(5px); }
     .main { flex:1; background:linear-gradient(160deg,#5a2f01 0%,#9a5c0a 100%); padding:40px; position:relative; overflow-y:auto; }
-    .particles { position:absolute; width:100%; height:100%; top:0; left:0; pointer-events:none; background-image:radial-gradient(#ffdd55 1px,transparent 1px); background-size:3px 3px; opacity:0.07; animation:glowMove 5s infinite linear; }
-    .content { position:relative; z-index:1; }
     .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:20px; }
     .pack { background:rgba(0,0,0,0.6); border:2px solid #ffd700; border-radius:12px; padding:10px; text-align:center; cursor:pointer; transition:0.3s; }
     .pack:hover { transform:scale(1.05); box-shadow:0 0 8px #ffd700; }
     .pack img { width:100%; height:100px; object-fit:cover; border-radius:8px; }
     .pack .name { margin-top:10px; font-size:16px; color:#ffdd55; font-weight:600; }
     .popup { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); display:flex; justify-content:center; align-items:center; flex-direction:column; z-index:999; cursor:pointer; }
-    .popup img { width:240px; height:240px; object-fit:contain; border-radius:20px; border:3px solid #ffd700; box-shadow:0 0 20px #ffd700; }
-    .popup .label { margin-top:20px; font-size:24px; color:#ffdd55; font-weight:700; }
-    .footer { position:absolute; bottom:10px; right:10px; color:#000; font-size:14px; }
-    .footer a { color:#000; font-weight:600; }
+    .popup img { width:240px; height:240px; object-fit:contain; border-radius:20px; border:3px solid #ffd700; }
+    .popup .label { margin-top:20px; font-size:24px; font-weight:700; }
+    /* Rarity animations */
+    .common { border-color:#aaa; box-shadow:0 0 10px #aaa; }
+    .rare { border-color:#00f; animation:pulseBlue 1.5s infinite; }
+    .epic { border-color:#a0f; animation:pulsePurple 1.5s infinite; }
+    .legendary { border-color:#ffd700; animation:pulseGold 1.5s infinite; }
+    @keyframes pulseBlue { 0%{box-shadow:0 0 10px #00f;} 50%{box-shadow:0 0 25px #00f;} 100%{box-shadow:0 0 10px #00f;} }
+    @keyframes pulsePurple { 0%{box-shadow:0 0 10px #a0f;} 50%{box-shadow:0 0 25px #a0f;} 100%{box-shadow:0 0 10px #a0f;} }
+    @keyframes pulseGold { 0%{box-shadow:0 0 10px #ffd700;} 50%{box-shadow:0 0 30px #ffd700;} 100%{box-shadow:0 0 10px #ffd700;} }
   </style>
 </head>
 <body>
@@ -32,92 +35,61 @@
     <a class="nav-link" href="stats.html">Stats</a>
     <a class="nav-link" href="market.html">Market</a>
     <a class="nav-link" href="golds.html">Inventory</a>
-    <a class="nav-link" href="index.html">Home</a>
-    <a class="nav-link" href="register.html">Register</a>
-    <a class="nav-link" href="login.html">Login</a>
-    <a class="nav-link" href="#">Settings</a>
   </div>
-
   <div class="main">
-    <div class="particles"></div>
-    <div class="content">
-      <h2 style="color:#ffd700; margin-bottom:20px;">Choose a Pack</h2>
-      <div class="grid" id="packGrid"></div>
-    </div>
-    <div class="footer">Running Goldet v1 · <a href="#">Terms of Service</a></div>
+    <h2 style="color:#ffd700;">Choose a Pack</h2>
+    <div class="grid" id="packGrid"></div>
   </div>
-
   <div class="popup" id="popup" style="display:none;" onclick="handlePopupClick()">
     <img id="popupImg" src="" alt="Pack">
     <div class="label" id="popupLabel">Opening Pack...</div>
   </div>
-
   <script>
-    const LS_INV = "goldetInventory";
-
-    // Define packs with images + items
-    const PACKS = {
-      "Space Pack": {
-        img: "https://images.unsplash.com/photo-1476610182048-b716b8518aae?q=80&w=600&auto=format&fit=crop",
-        items: [
-          { id: "earth", name: "Earth", img: "https://images.unsplash.com/photo-1631796606824-222a76914232?q=80&w=600&auto=format&fit=crop" },
-          { id: "mars", name: "Mars", img: "https://images.unsplash.com/photo-1580422333073-5e7b3a2b9c5e?q=80&w=600&auto=format&fit=crop" }
-        ]
-      },
-      "Combat Pack": {
-        img: "https://images.unsplash.com/photo-1602526216033-9b2d7e7e2c6f?q=80&w=600&auto=format&fit=crop",
-        items: [
-          { id: "sword", name: "Sword", img: "https://images.unsplash.com/photo-1602526216033-9b2d7e7e2c6f?q=80&w=600&auto=format&fit=crop" },
-          { id: "shield", name: "Shield", img: "https://images.unsplash.com/photo-1612197524239-2d7b2e7e2c6f?q=80&w=600&auto=format&fit=crop" }
-        ]
-      }
+    const LS_INV="goldetInventory";
+    const PACKS={
+      "Space Pack":{img:"https://picsum.photos/id/1011/300/200",items:[
+        {id:"earth",name:"Earth",img:"https://picsum.photos/id/1015/300/200",rarity:"uncommon"},
+        {id:"mars",name:"Mars",img:"https://picsum.photos/id/1021/300/200",rarity:"rare"}]},
+      "Combat Pack":{img:"https://picsum.photos/id/1040/300/200",items:[
+        {id:"sword",name:"Sword",img:"https://picsum.photos/id/1062/300/200",rarity:"common"},
+        {id:"shield",name:"Shield",img:"https://picsum.photos/id/1074/300/200",rarity:"epic"}]},
+      "Pirate Pack":{img:"https://picsum.photos/id/1084/300/200",items:[
+        {id:"treasure",name:"Treasure Chest",img:"https://picsum.photos/id/1080/300/200",rarity:"legendary"},
+        {id:"map",name:"Treasure Map",img:"https://picsum.photos/id/109/300/200",rarity:"rare"}]},
+      "Safari Pack":{img:"https://picsum.photos/id/110/300/200",items:[
+        {id:"lion",name:"Lion",img:"https://picsum.photos/id/111/300/200",rarity:"epic"},
+        {id:"elephant",name:"Elephant",img:"https://picsum.photos/id/112/300/200",rarity:"common"}]},
+      "Candy Pack":{img:"https://picsum.photos/id/113/300/200",items:[
+        {id:"lollipop",name:"Lollipop",img:"https://picsum.photos/id/114/300/200",rarity:"rare"},
+        {id:"chocolate",name:"Chocolate",img:"https://picsum.photos/id/115/300/200",rarity:"common"}]}
     };
-
-    const packGrid = document.getElementById("packGrid");
-    const popup = document.getElementById("popup");
-    const popupImg = document.getElementById("popupImg");
-    const popupLabel = document.getElementById("popupLabel");
-
-    let currentPack = null;
-    let revealStage = 0;
-    let revealedItem = null;
-
-    // Render packs into grid
-    for (const [packName, packData] of Object.entries(PACKS)) {
-      const div = document.createElement("div");
-      div.className = "pack";
-      div.innerHTML = `<img src="${packData.img}" alt="${packName}"><div class="name">${packName}</div>`;
-      div.onclick = () => openPack(packName);
+    const packGrid=document.getElementById("packGrid");
+    const popup=document.getElementById("popup");
+    const popupImg=document.getElementById("popupImg");
+    const popupLabel=document.getElementById("popupLabel");
+    let currentPack=null; let revealStage=0; let revealedItem=null;
+    for(const [packName,packData] of Object.entries(PACKS)){
+      const div=document.createElement("div");
+      div.className="pack";
+      div.innerHTML=`<img src="${packData.img}"><div class="name">${packName}</div>`;
+      div.onclick=()=>openPack(packName);
       packGrid.appendChild(div);
     }
-
-    function openPack(name) {
-      currentPack = name;
-      revealStage = 0;
-      popupImg.src = PACKS[name].img;
-      popupLabel.textContent = "Opening Pack...";
-      popup.style.display = "flex";
-    }
-
-    function handlePopupClick() {
-      if (revealStage === 0) {
-        const items = PACKS[currentPack].items;
-        revealedItem = items[Math.floor(Math.random() * items.length)];
-        popupImg.src = revealedItem.img;
-        popupLabel.textContent = revealedItem.name;
+    function openPack(name){currentPack=name;revealStage=0;popupImg.src=PACKS[name].img;popupLabel.textContent="Opening Pack...";popup.style.display="flex";}
+    function handlePopupClick(){
+      if(revealStage===0){
+        const items=PACKS[currentPack].items;
+        revealedItem=items[Math.floor(Math.random()*items.length)];
+        popupImg.src=revealedItem.img;
+        popupLabel.textContent=revealedItem.name;
+        popupImg.className=revealedItem.rarity;
         addToInventory(revealedItem.id);
-        revealStage = 1;
+        revealStage=1;
       } else {
-        popup.style.display = "none";
-        popupImg.src = "";
-        popupLabel.textContent = "";
-        currentPack = null;
-        revealedItem = null;
-        revealStage = 0;
+        popup.style.display="none"; popupImg.src=""; popupLabel.textContent=""; popupImg.className=""; currentPack=null; revealedItem=null; revealStage=0;
       }
     }
-
-    function addToInventory(itemId) {
+    function addToInventory(itemId){const inv=JSON.parse(localStorage    function addToInventory(itemId){
       const inv = JSON.parse(localStorage.getItem(LS_INV) || "{}");
       inv[itemId] = (inv[itemId] || 0) + 1;
       localStorage.setItem(LS_INV, JSON.stringify(inv));
