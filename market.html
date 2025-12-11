@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Market - Goldet</title>
+  <link rel="icon" type="image/png" href="https://cdn.discordapp.com/icons/1431394601813545083/f46fb8ebb7c5bffa35396308f2f511f3.webp?size=32">
+  <style>
+    body { margin: 0; font-family: 'Inter', Arial, sans-serif; background: #000; color: #fff; display: flex; height: 100vh; }
+
+    /* Sidebar */
+    .sidebar { width: 250px; background: #000; border-right: 2px solid #ffd700; padding: 30px 20px; display: flex; flex-direction: column; gap: 20px; }
+    .sidebar h1 {
+      font-size: 32px; margin: 0; font-weight: 800;
+      background: linear-gradient(90deg, #d4af37, #ffdd55); -webkit-background-clip: text; color: transparent;
+      text-shadow: 0 0 1px rgba(255, 215, 0, 0.4);
+    }
+    .nav-link { padding: 12px 18px; border-radius: 10px; border: 2px solid #ffd700; background: none; color: #ffd700; font-size: 18px; text-decoration: none; font-weight: 600; transition: 0.25s; }
+    .nav-link:hover { background: #ffd700; color: #000; transform: translateX(5px); }
+
+    /* Main */
+    .main { flex: 1; background: linear-gradient(160deg, #5a2f01 0%, #9a5c0a 100%); padding: 40px; position: relative; overflow-y: auto; }
+    .particles { position: absolute; width: 100%; height: 100%; top: 0; left: 0; pointer-events: none; background-image: radial-gradient(#ffdd55 1px, transparent 1px); background-size: 3px 3px; opacity: 0.07; animation: glowMove 5s infinite linear; }
+    .content { position: relative; z-index: 1; }
+
+    /* Header info */
+    .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .topbar .balance, .topbar .user { padding: 12px 16px; border: 2px solid #ffd700; border-radius: 12px; background: rgba(0,0,0,0.6); color: #ffd700; font-weight: 600; }
+
+    /* Cards grid */
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
+    .card { background: rgba(0,0,0,0.6); border: 2px solid #ffd700; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+    .card-title { font-size: 20px; color: #ffd700; font-weight: 700; }
+    .card-img { width: 100%; height: 140px; border-radius: 10px; object-fit: cover; background: #000; border: 1px solid #ffd700; }
+    .price { color: #ffdd55; font-weight: 600; }
+    .actions { display: flex; gap: 10px; }
+    .btn { flex: 1; padding: 12px; border-radius: 40px; border: 2px solid #ffd700; background: none; color: #ffd700; font-size: 16px; cursor: pointer; transition: 0.25s; font-weight: 600; }
+    .btn:hover { background: #ffd700; color: #000; transform: translateY(-2px); }
+    .btn.secondary { border-color: #ffb000; color: #ffb000; }
+    .btn.secondary:hover { background: #ffb000; color: #000; }
+
+    /* Inventory section */
+    .section { margin-top: 30px; padding: 20px; border: 2px solid #ffd700; border-radius: 15px; background: rgba(0,0,0,0.6); }
+    .section h2 { margin: 0 0 12px; font-size: 24px; color: #ffd700; }
+
+    /* Toast */
+    .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 12px 18px; background: #000; color: #ffd700; border: 2px solid #ffd700; border-radius: 12px; box-shadow: 0 0 1px #ffd700; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 999; }
+    .toast.show { opacity: 1; }
+
+    /* Footer */
+    .footer { position: absolute; bottom: 10px; right: 10px; color: #000; font-size: 14px; }
+    .footer a { color: #000; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <h1>Goldet</h1>
+    <a class="nav-link" href="stats.html">Stats</a>
+    <a class="nav-link" href="market.html">Market</a>
+    <a class="nav-link" href="index.html">Home</a>
+    <a class="nav-link" href="register.html">Register</a>
+    <a class="nav-link" href="login.html">Login</a>
+    <a class="nav-link" href="#">Settings</a>
+  </div>
+
+  <div class="main">
+    <div class="particles"></div>
+    <div class="content">
+      <div class="topbar">
+        <div class="user" id="userBox">User: —</div>
+        <div class="balance" id="balanceBox">Balance: 0</div>
+      </div>
+
+      <div class="section">
+        <h2>Market</h2>
+        <div class="grid" id="marketGrid"></div>
+      </div>
+
+      <div class="section">
+        <h2>Your inventory</h2>
+        <div id="inventoryList">No items yet.</div>
+      </div>
+    </div>
+    <div class="footer">Running Goldet v1 · <a href="#">Terms of Service</a></div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // --- Data & Helpers ---
+    const ITEMS = [
+      { id: "gold-bar", name: "Gold Bar", price: 250, img: "https://images.unsplash.com/photo-1631796606824-222a76914232?q=80&w=600&auto=format&fit=crop" },
+      { id: "gold-coin", name: "Gold Coin", price: 80, img: "https://images.unsplash.com/photo-1610387272038-1b1f6ebadc77?q=80&w=600&auto=format&fit=crop" },
+      { id: "golden-key", name: "Golden Key", price: 150, img: "https://images.unsplash.com/photo-1508096092309-228f86e5a3c6?q=80&w=600&auto=format&fit=crop" },
+      { id: "royal-crown", name: "Royal Crown", price: 600, img: "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=600&auto=format&fit=crop" }
+    ];
+
+    const LS_USER = "goldetUser";
+    const LS_BALANCE = "goldetBalance";
+    const LS_INV = "goldetInventory";
+
+    const toast = (msg) => {
+      const el = document.getElementById("toast");
+      el.textContent = msg;
+      el.classList.add("show");
+      clearTimeout(el._t);
+      el._t = setTimeout(() => el.classList.remove("show"), 1500);
+    };
+
+    const getUser = () => {
+      const raw = localStorage.getItem(LS_USER);
+      return raw ? JSON.parse(raw) : null;
+    };
+    const getBalance = () => Number(localStorage.getItem(LS_BALANCE) ?? 1000); // default starting balance
+    const setBalance = (val) => localStorage.setItem(LS_BALANCE, String(val));
+    const getInventory = () => {
+      const raw = localStorage.getItem(LS_INV);
+      return raw ? JSON.parse(raw) : {};
+    };
+    const setInventory = (inv) => localStorage.setItem(LS_INV, JSON.stringify(inv));
+
+    const renderHeader = () => {
+      const user = getUser();
+      document.getElementById("userBox").textContent = user ? "User: " + user.username : "User: Not logged in";
+      document.getElementById("balanceBox").textContent = "Balance: " + getBalance();
+    };
+
+    const renderMarket = () => {
+      const grid = document.getElementById("marketGrid");
+      grid.innerHTML = "";
+      ITEMS.forEach(item => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <img class="card-img" src="${item.img}" alt="${item.name}">
+          <div class="card-title">${item.name}</div>
+          <div class="price">Price: ${item.price}</div>
+          <div class="actions">
+            <button class="btn" data-action="buy" data-id="${item.id}">Buy</button>
+            <button class="btn secondary" data-action="sell" data-id="${item.id}">Sell</button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    };
+
+    const renderInventory = () => {
+      const inv = getInventory();
+      const wrap = document.getElementById("inventoryList");
+      const entries = Object.entries(inv);
+      if (!entries.length) {
+        wrap.textContent = "No items yet.";
+        return;
+      }
+      wrap.innerHTML = entries.map(([id, qty]) => {
+        const item = ITEMS.find(i => i.id === id);
+        const name = item ? item.name : id;
+        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,215,0,0.2);">
+                  <span style="color:#ffdd55;font-weight:600;">${name}</span>
+                  <span style="color:#ffd700;">Qty: ${qty}</span>
+                </div>`;
+      }).join("");
+    };
+
+    const ensureLoggedIn = () => {
+      const user = getUser();
+      if (!user) {
+        toast("Please login to use the market.");
+        setTimeout(() => window.location.href = "login.html", 900);
+        return false;
+      }
+      return true;
+    };
+
+    // --- Actions ---
+    const buyItem = (id) => {
+      if (!ensureLoggedIn()) return;
+      const item = ITEMS.find(i => i.id === id);
+      const bal = getBalance();
+      if (!item) return;
+      if (bal < item.price) {
+        toast("Not enough balance.");
+        return;
+      }
+      const inv = getInventory();
+      inv[id] = (inv[id] || 0) + 1;
+      setInventory(inv);
+      setBalance(bal - item.price);
+      renderHeader();
+      renderInventory();
+      toast(`Bought ${item.name}`);
+    };
+
+    const sellItem = (id) => {
+      if (!ensureLoggedIn()) return;
+      const item = ITEMS.find(i => i.id === id);
+      if (!item) return;
+      const inv = getInventory();
+      const qty = inv[id] || 0;
+      if (qty <= 0) {
+        toast("You don't own this item.");
+        return;
+      }
+      // Optional confirm for high-value items
+      if (item.price >= 500 && !confirm(`Sell ${item.name} for ${Math.floor(item.price * 0.6)}?`)) return;
+
+      const bal = getBalance();
+      const sellValue = Math.floor(item.price * 0.6); // 60% resale
+      inv[id] = qty - 1;
+      if (inv[id] === 0) delete inv[id];
+      setInventory(inv);
+      setBalance(bal + sellValue);
+      renderHeader();
+      renderInventory();
+      toast(`Sold ${item.name}`);
+    };
+
+    // --- Events ---
+    document.addEventListener("click", (e) => {
+      const t = e.target;
+      if (!(t instanceof HTMLElement)) return;
+      if (t.dataset.action === "buy") buyItem(t.dataset.id);
+      if (t.dataset.action === "sell") sellItem(t.dataset.id);
+    });
+
+    // --- Init ---
+    (function init() {
+      // Seed balance if missing
+      if (!localStorage.getItem(LS_BALANCE)) setBalance(1000);
+      renderHeader();
+      renderMarket();
+      renderInventory();
+    })();
+  </script>
+</body>
+</html>
