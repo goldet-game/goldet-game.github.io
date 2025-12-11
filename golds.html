@@ -1,185 +1,237 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Golds - Inventory</title>
-  <link rel="icon" type="image/png" href="https://cdn.discordapp.com/icons/1431394601813545083/f46fb8ebb7c5bffa35396308f2f511f3.webp?size=32">
   <style>
-    body {
-      margin: 0;
-      font-family: 'Inter', Arial, sans-serif;
-      background: #000;
-      color: #fff;
-      display: flex;
-      height: 100vh;
+    :root{
+      --gold:#ffd700;
+      --gold-acc:#ffdd55;
+      --bg-dark:#000;
+      --panel: rgba(0,0,0,0.6);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter,Arial,sans-serif;
+      background:var(--bg-dark);
+      color:#fff;
+      display:flex;
+      height:100vh;
+      overflow:auto;
     }
 
-    .sidebar {
-      width: 250px;
-      background: #000;
-      border-right: 2px solid #ffd700;
-      padding: 30px 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
+    .sidebar{
+      width:250px;
+      background:#000;
+      border-right:2px solid var(--gold);
+      padding:28px 18px;
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+    }
+    .brand{
+      font-weight:800;
+      font-size:28px;
+      background:linear-gradient(90deg,#d4af37,var(--gold-acc));
+      -webkit-background-clip:text;
+      color:transparent;
+      text-shadow:0 0 1px rgba(255,215,0,0.6);
+    }
+    .nav-link{
+      display:block;
+      padding:10px 12px;
+      border-radius:10px;
+      border:2px solid var(--gold);
+      color:var(--gold);
+      text-decoration:none;
+      font-weight:600;
+      text-shadow:0 0 1px var(--gold);
+      transition:transform .18s,background .18s,color .18s;
+    }
+    .nav-link:hover{ transform:translateX(6px); background:var(--gold); color:#000; }
+
+    .main{
+      flex:1;
+      background:linear-gradient(160deg,#5a2f01 0%,#9a5c0a 100%);
+      padding:28px;
+      position:relative;
+    }
+    .header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:18px;
+    }
+    .balance{
+      padding:8px 12px;
+      border:2px solid var(--gold);
+      border-radius:10px;
+      color:var(--gold);
+      text-shadow:0 0 1px var(--gold);
+      background:rgba(0,0,0,0.45);
+      font-weight:700;
     }
 
-    .sidebar h1 {
-      font-size: 32px;
-      margin: 0;
-      font-weight: 800;
-      background: linear-gradient(90deg, #d4af37, #ffdd55);
-      -webkit-background-clip: text;
-      color: transparent;
-      text-shadow: 0 0 1px rgba(255, 215, 0, 0.4);
+    .pack{
+      margin-bottom:28px;
+    }
+    .pack h2{
+      margin:0 0 12px 0;
+      color:var(--gold);
+      text-shadow:0 0 1px var(--gold);
+      font-size:22px;
     }
 
-    .nav-link {
-      padding: 12px 18px;
-      border-radius: 10px;
-      border: 2px solid #ffd700;
-      background: none;
-      color: #ffd700;
-      font-size: 18px;
-      text-decoration: none;
-      font-weight: 600;
-      transition: 0.25s;
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+      gap:14px;
     }
+    .card{
+      background:var(--panel);
+      border:2px solid var(--gold);
+      border-radius:12px;
+      padding:8px;
+      text-align:center;
+      transition:transform .12s;
+    }
+    .card img{
+      width:100%;
+      height:100px;
+      object-fit:cover;
+      border-radius:8px;
+      filter:grayscale(100%) brightness(0.4);
+    }
+    .card.owned img{ filter:none; }
+    .name{ margin-top:8px; color:var(--gold-acc); font-weight:700; text-shadow:0 0 1px var(--gold-acc); }
+    .qty{ margin-top:6px; color:var(--gold); text-shadow:0 0 1px var(--gold); font-weight:700; }
 
-    .nav-link:hover {
-      background: #ffd700;
-      color: #000;
-      transform: translateX(5px);
+    .sell-btn{
+      margin-top:8px;
+      padding:6px 10px;
+      border-radius:8px;
+      border:2px solid #ff4444;
+      background:none;
+      color:#ff4444;
+      font-weight:700;
+      cursor:pointer;
+      text-shadow:0 0 1px #ff4444;
     }
+    .sell-btn:hover{ background:#ff4444; color:#000; }
 
-    .main {
-      flex: 1;
-      background: linear-gradient(160deg, #5a2f01 0%, #9a5c0a 100%);
-      padding: 40px;
-      position: relative;
-      overflow-y: auto;
-    }
+    /* rarity subtle 1px glow */
+    .rarity-common{ border-color:#9b9b9b; box-shadow:0 0 1px #9b9b9b; }
+    .rarity-rare{ border-color:#2b6cff; box-shadow:0 0 1px #2b6cff; }
+    .rarity-epic{ border-color:#a05cff; box-shadow:0 0 1px #a05cff; }
+    .rarity-legendary{ border-color:var(--gold); box-shadow:0 0 1px var(--gold); }
 
-    .particles {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      top: 0;
-      left: 0;
-      pointer-events: none;
-      background-image: radial-gradient(#ffdd55 1px, transparent 1px);
-      background-size: 3px 3px;
-      opacity: 0.07;
-      animation: glowMove 5s infinite linear;
-    }
-
-    .content {
-      position: relative;
-      z-index: 1;
-    }
-
-    .pack {
-      margin-bottom: 40px;
-    }
-
-    .pack h2 {
-      font-size: 28px;
-      color: #ffd700;
-      margin-bottom: 16px;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-      gap: 20px;
-    }
-
-    .card {
-      background: rgba(0,0,0,0.6);
-      border: 2px solid #ffd700;
-      border-radius: 12px;
-      padding: 10px;
-      text-align: center;
-      transition: 0.3s;
-    }
-
-    .card img {
-      width: 100%;
-      height: 100px;
-      object-fit: cover;
-      border-radius: 8px;
-      filter: grayscale(100%) brightness(0.4);
-      transition: 0.3s;
-    }
-
-    .card.owned img {
-      filter: none;
-    }
-
-    .card .name {
-      margin-top: 10px;
-      font-size: 16px;
-      color: #ffdd55;
-      font-weight: 600;
-    }
-
-    .card .qty {
-      font-size: 14px;
-      color: #ffd700;
-    }
-
-    .footer {
-      position: absolute;
-      bottom: 10px;
-      right: 10px;
-      color: #000;
-      font-size: 14px;
-    }
-
-    .footer a {
-      color: #000;
-      font-weight: 600;
-    }
+    .note{ color:rgba(255,255,255,0.85); font-size:13px; margin-bottom:12px; }
   </style>
 </head>
 <body>
   <div class="sidebar">
-    <h1>Goldet</h1>
+    <div class="brand">Goldet</div>
     <a class="nav-link" href="stats.html">Stats</a>
     <a class="nav-link" href="market.html">Market</a>
     <a class="nav-link" href="golds.html">Inventory</a>
-    <a class="nav-link" href="index.html">Home</a>
-    <a class="nav-link" href="register.html">Register</a>
-    <a class="nav-link" href="login.html">Login</a>
-    <a class="nav-link" href="#">Settings</a>
   </div>
 
   <div class="main">
-    <div class="particles"></div>
-    <div class="content" id="inventoryDisplay"></div>
-    <div class="footer">Running Goldet v1 · <a href="#">Terms of Service</a></div>
+    <div class="header">
+      <div>
+        <div style="font-size:20px;color:var(--gold);font-weight:800;text-shadow:0 0 1px var(--gold);">Your Golds</div>
+        <div class="note">Items are grouped by pack. Click Sell to remove an item and refund 50%.</div>
+      </div>
+      <div class="balance" id="balanceBox">Balance: 0</div>
+    </div>
+
+    <div id="inventoryDisplay"></div>
   </div>
 
   <script>
     const LS_INV = "goldetInventory";
+    const LS_BAL = "goldetBalance";
 
+    // same pack definitions as market (IDs must match)
     const PACKS = {
       "Space Pack": [
-        { id: "earth", name: "Earth", img: "https://images.unsplash.com/photo-1476610182048-b716b8518aae?q=80&w=600&auto=format&fit=crop" },
-        { id: "mars", name: "Mars", img: "https://images.unsplash.com/photo-1580422333073-5e7b3a2b9c5e?q=80&w=600&auto=format&fit=crop" }
+        { id: "earth", name: "Earth", img: "https://picsum.photos/id/1015/600/400", rarity: "common", price: 100 },
+        { id: "mars", name: "Mars", img: "https://picsum.photos/id/1021/600/400", rarity: "rare", price: 150 },
+        { id: "jupiter", name: "Jupiter", img: "https://picsum.photos/id/1003/600/400", rarity: "epic", price: 300 },
+        { id: "nebula", name: "Nebula", img: "https://picsum.photos/id/1016/600/400", rarity: "legendary", price: 600 }
       ],
       "Combat Pack": [
-        { id: "sword", name: "Sword", img: "https://images.unsplash.com/photo-1602526216033-9b2d7e7e2c6f?q=80&w=600&auto=format&fit=crop" },
-        { id: "shield", name: "Shield", img: "https://images.unsplash.com/photo-1612197524239-2d7b2e7e2c6f?q=80&w=600&auto=format&fit=crop" }
+        { id: "sword", name: "Sword", img: "https://picsum.photos/id/1062/600/400", rarity: "common", price: 50 },
+        { id: "axe", name: "Axe", img: "https://picsum.photos/id/1063/600/400", rarity: "rare", price: 120 },
+        { id: "shield", name: "Shield", img: "https://picsum.photos/id/1074/600/400", rarity: "epic", price: 250 },
+        { id: "warhelm", name: "War Helm", img: "https://picsum.photos/id/1076/600/400", rarity: "legendary", price: 550 }
+      ],
+      "Pirate Pack": [
+        { id: "map", name: "Treasure Map", img: "https://picsum.photos/id/109/600/400", rarity: "rare", price: 120 },
+        { id: "compass", name: "Compass", img: "https://picsum.photos/id/110/600/400", rarity: "common", price: 60 },
+        { id: "chest", name: "Treasure Chest", img: "https://picsum.photos/id/1080/600/400", rarity: "legendary", price: 700 },
+        { id: "parrot", name: "Parrot", img: "https://picsum.photos/id/111/600/400", rarity: "epic", price: 260 }
+      ],
+      "Safari Pack": [
+        { id: "lion", name: "Lion", img: "https://picsum.photos/id/237/600/400", rarity: "epic", price: 320 },
+        { id: "elephant", name: "Elephant", img: "https://picsum.photos/id/1025/600/400", rarity: "common", price: 80 },
+        { id: "giraffe", name: "Giraffe", img: "https://picsum.photos/id/1027/600/400", rarity: "rare", price: 140 },
+        { id: "rhino", name: "Rhino", img: "https://picsum.photos/id/1024/600/400", rarity: "legendary", price: 620 }
+      ],
+      "Candy Pack": [
+        { id: "lollipop", name: "Lollipop", img: "https://picsum.photos/id/114/600/400", rarity: "common", price: 40 },
+        { id: "chocolate", name: "Chocolate", img: "https://picsum.photos/id/115/600/400", rarity: "common", price: 50 },
+        { id: "gummy", name: "Gummy", img: "https://picsum.photos/id/116/600/400", rarity: "rare", price: 110 },
+        { id: "candybag", name: "Candy Bag", img: "https://picsum.photos/id/117/600/400", rarity: "epic", price: 230 }
+      ],
+      "Dino Pack": [
+        { id: "t-rex", name: "T-Rex", img: "https://picsum.photos/id/119/600/400", rarity: "epic", price: 340 },
+        { id: "triceratops", name: "Triceratops", img: "https://picsum.photos/id/120/600/400", rarity: "rare", price: 150 },
+        { id: "velociraptor", name: "Velociraptor", img: "https://picsum.photos/id/121/600/400", rarity: "common", price: 70 },
+        { id: "pterosaur", name: "Pterosaur", img: "https://picsum.photos/id/122/600/400", rarity: "legendary", price: 580 }
+      ],
+      "Magic Pack": [
+        { id: "wand", name: "Wand", img: "https://picsum.photos/id/124/600/400", rarity: "common", price: 60 },
+        { id: "spellbook", name: "Spellbook", img: "https://picsum.photos/id/125/600/400", rarity: "rare", price: 140 },
+        { id: "crystal", name: "Crystal", img: "https://picsum.photos/id/126/600/400", rarity: "epic", price: 300 },
+        { id: "phoenix", name: "Phoenix", img: "https://picsum.photos/id/127/600/400", rarity: "legendary", price: 650 }
+      ],
+      "Music Pack": [
+        { id: "guitar", name: "Guitar", img: "https://picsum.photos/id/129/600/400", rarity: "common", price: 70 },
+        { id: "drums", name: "Drums", img: "https://picsum.photos/id/130/600/400", rarity: "rare", price: 160 },
+        { id: "synth", name: "Synth", img: "https://picsum.photos/id/131/600/400", rarity: "epic", price: 310 },
+        { id: "microphone", name: "Microphone", img: "https://picsum.photos/id/132/600/400", rarity: "legendary", price: 540 }
+      ],
+      "Retro Pack": [
+        { id: "arcade", name: "Arcade", img: "https://picsum.photos/id/134/600/400", rarity: "rare", price: 180 },
+        { id: "cassette", name: "Cassette", img: "https://picsum.photos/id/135/600/400", rarity: "common", price: 45 },
+        { id: "polaroid", name: "Polaroid", img: "https://picsum.photos/id/136/600/400", rarity: "epic", price: 280 },
+        { id: "vhs", name: "VHS", img: "https://picsum.photos/id/137/600/400", rarity: "legendary", price: 520 }
       ]
     };
 
-    const inventory = JSON.parse(localStorage.getItem(LS_INV) || "{}");
+    // helper: map rarity -> CSS class
+    const rarityClass = {
+      common: "rarity-common",
+      rare: "rarity-rare",
+      epic: "rarity-epic",
+      legendary: "rarity-legendary"
+    };
 
+    // load inventory and balance
+    const inv = JSON.parse(localStorage.getItem(LS_INV) || "{}");
+    if (!localStorage.getItem(LS_BAL)) localStorage.setItem(LS_BAL, "1000");
+    const balanceBox = document.getElementById("balanceBox");
+    function refreshBalance() {
+      balanceBox.textContent = "Balance: " + (parseInt(localStorage.getItem(LS_BAL) || "0"));
+    }
+    refreshBalance();
+
+    // render inventory grouped by pack
     const display = document.getElementById("inventoryDisplay");
     display.innerHTML = "";
-
     for (const [packName, items] of Object.entries(PACKS)) {
       const section = document.createElement("div");
       section.className = "pack";
@@ -187,18 +239,58 @@
       const grid = section.querySelector(".grid");
 
       items.forEach(item => {
-        const owned = inventory[item.id] || 0;
+        const qty = inv[item.id] || 0;
         const card = document.createElement("div");
-        card.className = "card" + (owned ? " owned" : "");
+        card.className = "card " + (qty > 0 ? "owned " : "") + (rarityClass[item.rarity] || "");
         card.innerHTML = `
           <img src="${item.img}" alt="${item.name}">
           <div class="name">${item.name}</div>
-          ${owned ? `<div class="qty">Qty: ${owned}</div>` : ""}
+          ${qty > 0 ? `<div class="qty">Qty: ${qty}</div><button class="sell-btn" data-id="${item.id}" data-price="${item.price}">Sell</button>` : `<div class="qty muted">Locked</div>`}
         `;
         grid.appendChild(card);
       });
 
       display.appendChild(section);
+    }
+
+    // sell handler (delegated)
+    document.addEventListener("click", (e) => {
+      const btn = e.target.closest(".sell-btn");
+      if (!btn) return;
+      const id = btn.dataset.id;
+      const price = parseInt(btn.dataset.price || "0");
+      sellItem(id, price);
+    });
+
+    function sellItem(id, price) {
+      const invObj = JSON.parse(localStorage.getItem(LS_INV) || "{}");
+      if (!invObj[id]) return;
+      // decrement
+      invObj[id]--;
+      if (invObj[id] <= 0) delete invObj[id];
+      localStorage.setItem(LS_INV, JSON.stringify(invObj));
+      // refund 50%
+      let bal = parseInt(localStorage.getItem(LS_BAL) || "0");
+      bal += Math.floor(price * 0.5);
+      localStorage.setItem(LS_BAL, String(bal));
+      // update UI without reload
+      refreshBalance();
+      // update card qty or replace with Locked
+      const btns = document.querySelectorAll(`.sell-btn[data-id="${id}"]`);
+      btns.forEach(b => {
+        const card = b.closest(".card");
+        const qtyEl = card.querySelector(".qty");
+        const newQty = invObj[id] || 0;
+        if (newQty > 0) {
+          qtyEl.textContent = "Qty: " + newQty;
+        } else {
+          // replace content to locked
+          card.classList.remove("owned");
+          const imgSrc = card.querySelector('img').src;
+          const nameText = card.querySelector('.name').textContent;
+          card.innerHTML = `<img src="${imgSrc}" alt=""><div class="name">${nameText}</div><div class="qty muted">Locked</div>`;
+        }
+      });
     }
   </script>
 </body>
