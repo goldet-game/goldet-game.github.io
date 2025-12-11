@@ -6,156 +6,24 @@
   <title>Market - Goldet</title>
   <link rel="icon" type="image/png" href="https://cdn.discordapp.com/icons/1431394601813545083/f46fb8ebb7c5bffa35396308f2f511f3.webp?size=32">
   <style>
-    body {
-      margin: 0;
-      font-family: 'Inter', Arial, sans-serif;
-      background: #000;
-      color: #fff;
-      display: flex;
-      height: 100vh;
-      overflow: hidden;
-    }
-
-    .sidebar {
-      width: 250px;
-      background: #000;
-      border-right: 2px solid #ffd700;
-      padding: 30px 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .sidebar h1 {
-      font-size: 32px;
-      margin: 0;
-      font-weight: 800;
-      background: linear-gradient(90deg, #d4af37, #ffdd55);
-      -webkit-background-clip: text;
-      color: transparent;
-      text-shadow: 0 0 1px rgba(255, 215, 0, 0.4);
-    }
-
-    .nav-link {
-      padding: 12px 18px;
-      border-radius: 10px;
-      border: 2px solid #ffd700;
-      background: none;
-      color: #ffd700;
-      font-size: 18px;
-      text-decoration: none;
-      font-weight: 600;
-      transition: 0.25s;
-    }
-
-    .nav-link:hover {
-      background: #ffd700;
-      color: #000;
-      transform: translateX(5px);
-    }
-
-    .main {
-      flex: 1;
-      background: linear-gradient(160deg, #5a2f01 0%, #9a5c0a 100%);
-      padding: 40px;
-      position: relative;
-      overflow-y: auto;
-    }
-
-    .particles {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      top: 0;
-      left: 0;
-      pointer-events: none;
-      background-image: radial-gradient(#ffdd55 1px, transparent 1px);
-      background-size: 3px 3px;
-      opacity: 0.07;
-      animation: glowMove 5s infinite linear;
-    }
-
-    .content {
-      position: relative;
-      z-index: 1;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 20px;
-    }
-
-    .pack {
-      background: rgba(0,0,0,0.6);
-      border: 2px solid #ffd700;
-      border-radius: 12px;
-      padding: 10px;
-      text-align: center;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-
-    .pack:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 8px #ffd700;
-    }
-
-    .pack img {
-      width: 100%;
-      height: 100px;
-      object-fit: cover;
-      border-radius: 8px;
-    }
-
-    .pack .name {
-      margin-top: 10px;
-      font-size: 16px;
-      color: #ffdd55;
-      font-weight: 600;
-    }
-
-    .popup {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.95);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      z-index: 999;
-      cursor: pointer;
-    }
-
-    .popup img {
-      width: 240px;
-      height: 240px;
-      object-fit: contain;
-      border-radius: 20px;
-      border: 3px solid #ffd700;
-      box-shadow: 0 0 20px #ffd700;
-    }
-
-    .popup .label {
-      margin-top: 20px;
-      font-size: 24px;
-      color: #ffdd55;
-      font-weight: 700;
-    }
-
-    .footer {
-      position: absolute;
-      bottom: 10px;
-      right: 10px;
-      color: #000;
-      font-size: 14px;
-    }
-
-    .footer a {
-      color: #000;
-      font-weight: 600;
-    }
+    body { margin:0; font-family:'Inter',Arial,sans-serif; background:#000; color:#fff; display:flex; height:100vh; overflow:hidden; }
+    .sidebar { width:250px; background:#000; border-right:2px solid #ffd700; padding:30px 20px; display:flex; flex-direction:column; gap:20px; }
+    .sidebar h1 { font-size:32px; margin:0; font-weight:800; background:linear-gradient(90deg,#d4af37,#ffdd55); -webkit-background-clip:text; color:transparent; text-shadow:0 0 1px rgba(255,215,0,0.4); }
+    .nav-link { padding:12px 18px; border-radius:10px; border:2px solid #ffd700; background:none; color:#ffd700; font-size:18px; text-decoration:none; font-weight:600; transition:0.25s; }
+    .nav-link:hover { background:#ffd700; color:#000; transform:translateX(5px); }
+    .main { flex:1; background:linear-gradient(160deg,#5a2f01 0%,#9a5c0a 100%); padding:40px; position:relative; overflow-y:auto; }
+    .particles { position:absolute; width:100%; height:100%; top:0; left:0; pointer-events:none; background-image:radial-gradient(#ffdd55 1px,transparent 1px); background-size:3px 3px; opacity:0.07; animation:glowMove 5s infinite linear; }
+    .content { position:relative; z-index:1; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:20px; }
+    .pack { background:rgba(0,0,0,0.6); border:2px solid #ffd700; border-radius:12px; padding:10px; text-align:center; cursor:pointer; transition:0.3s; }
+    .pack:hover { transform:scale(1.05); box-shadow:0 0 8px #ffd700; }
+    .pack img { width:100%; height:100px; object-fit:cover; border-radius:8px; }
+    .pack .name { margin-top:10px; font-size:16px; color:#ffdd55; font-weight:600; }
+    .popup { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); display:flex; justify-content:center; align-items:center; flex-direction:column; z-index:999; cursor:pointer; }
+    .popup img { width:240px; height:240px; object-fit:contain; border-radius:20px; border:3px solid #ffd700; box-shadow:0 0 20px #ffd700; }
+    .popup .label { margin-top:20px; font-size:24px; color:#ffdd55; font-weight:700; }
+    .footer { position:absolute; bottom:10px; right:10px; color:#000; font-size:14px; }
+    .footer a { color:#000; font-weight:600; }
   </style>
 </head>
 <body>
@@ -187,16 +55,17 @@
   <script>
     const LS_INV = "goldetInventory";
 
+    // Define packs with images + items
     const PACKS = {
       "Space Pack": {
-        img: "https://static01.nyt.com/images/2022/07/12/multimedia/-12vid-nasa-highlights-video-cover/-12vid-nasa-highlights-video-cover-square640.jpg",
+        img: "https://images.unsplash.com/photo-1476610182048-b716b8518aae?q=80&w=600&auto=format&fit=crop",
         items: [
           { id: "earth", name: "Earth", img: "https://images.unsplash.com/photo-1631796606824-222a76914232?q=80&w=600&auto=format&fit=crop" },
           { id: "mars", name: "Mars", img: "https://images.unsplash.com/photo-1580422333073-5e7b3a2b9c5e?q=80&w=600&auto=format&fit=crop" }
         ]
       },
       "Combat Pack": {
-        img: "https://blacket.org/content/packs/Combat.webp",
+        img: "https://images.unsplash.com/photo-1602526216033-9b2d7e7e2c6f?q=80&w=600&auto=format&fit=crop",
         items: [
           { id: "sword", name: "Sword", img: "https://images.unsplash.com/photo-1602526216033-9b2d7e7e2c6f?q=80&w=600&auto=format&fit=crop" },
           { id: "shield", name: "Shield", img: "https://images.unsplash.com/photo-1612197524239-2d7b2e7e2c6f?q=80&w=600&auto=format&fit=crop" }
@@ -213,6 +82,7 @@
     let revealStage = 0;
     let revealedItem = null;
 
+    // Render packs into grid
     for (const [packName, packData] of Object.entries(PACKS)) {
       const div = document.createElement("div");
       div.className = "pack";
@@ -238,21 +108,6 @@
         addToInventory(revealedItem.id);
         revealStage = 1;
       } else {
-        popup.style.display = "none";
-        popupImg.src = "";
-        popupLabel.textContent = "";
-        currentPack = null;
-    function handlePopupClick() {
-      if (revealStage === 0) {
-        // Reveal a random item from the chosen pack
-        const items = PACKS[currentPack].items;
-        revealedItem = items[Math.floor(Math.random() * items.length)];
-        popupImg.src = revealedItem.img;
-        popupLabel.textContent = revealedItem.name;
-        addToInventory(revealedItem.id);
-        revealStage = 1;
-      } else {
-        // Close popup and reset
         popup.style.display = "none";
         popupImg.src = "";
         popupLabel.textContent = "";
